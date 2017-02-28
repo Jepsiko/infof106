@@ -34,7 +34,7 @@ class Jeu:
         self.bonzes = {}
         self.players = self.gui_setup.setup_players()
         self.gui_setup.destroy()
-        self.pawns = [{} for i in range(len(self.players))]
+        self.pawns = [{} for _ in range(len(self.players))]
         self.blocked_routes = set()
         
         self.gui = GUI()
@@ -43,7 +43,7 @@ class Jeu:
         winning_player = -1
         current_player = 0
         
-        bonzes, pawns, blocked_ways = self.gui.init(len(self.players));
+        bonzes, pawns, blocked_ways = self.gui.init(len(self.players))
         end_game = False
         
         while not end_game:
