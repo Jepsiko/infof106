@@ -18,6 +18,8 @@ from PyQt4 import QtGui, QtCore
 
 
 class GUI(QtGui.QWidget):
+    """ Class that handle the graphique side of the game """
+    
     def __init__(self):
         self.app = QtGui.QApplication(sys.argv)
         super(GUI, self).__init__()
@@ -85,4 +87,3 @@ class GUI(QtGui.QWidget):
         playerBox.setLayout(layout)
     
         return playerBox
-    

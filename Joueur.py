@@ -13,7 +13,14 @@ Matricule : 000422751
 
 
 class Joueur:
-    """
-    Classe qui représente un joueur
-    """
-    pass
+    """ Class that represent a player """
+    
+    def __init__(self, ID, AI):
+        self.ID = ID
+        self.AI = AI
+        
+    def getID(self):
+        return self.ID
+    
+    def isAI(self):
+        return self.AI

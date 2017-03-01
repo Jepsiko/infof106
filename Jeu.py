@@ -61,18 +61,6 @@ class Jeu:
         # Set a given seed for repeatability
         random.seed(17)
 
-    # Section 2.2.2 - Affichage en couleur
-
-    def print_color(self, color, text, sep):
-        """ Prints colored text
-
-        Keyword arguments:
-        color -- Integer representing the ANSI code of the color
-        text -- String to be colored
-        sep -- Separator to be used at the end of the string
-        """
-        print(self.CSI + str(color) + "m" + text + self.CSI + "0m", end=sep)
-
     # Section 2.2.3 - Remaniement fonctions
     def check_top(self, player_pawns):
         """ Check if three pawns/bonzes have reached simultaneously the top of the corresponding routes.
@@ -232,8 +220,7 @@ class Jeu:
         return available_bonzes - 1
 
     # Section 2.2.3 - Autres fonctions
-
-    # noinspection PyTypeChecker
+    
     def choose_dice_human(self, res_dice, player_id):
         """ Choice of the pair of dice that should be chosen to advance the bonzes - Human Version
 
@@ -309,8 +296,7 @@ class Jeu:
 
         return stop
 
-    @staticmethod
-    def is_blocked(res_dice, blocked_routes, bonzes):
+    def is_blocked(self, res_dice, blocked_routes):
         """ Check whether a player is blocked or not.
 
         Keywords arguments:
@@ -321,7 +307,7 @@ class Jeu:
 
         available_routes = {i for i in range(2, 13)}.difference(blocked_routes)
         possible_routes = {sum(i) for i in itertools.combinations(res_dice, 2)}
-        bonze_routes = {key for key in bonzes}
+        bonze_routes = {key for key in self.bonzes}
         return len(possible_routes.intersection(bonze_routes).intersection(available_routes)) == 0
 
     # Section 2.2.4 - AI
@@ -438,37 +424,6 @@ class Jeu:
         """
         return self.decide_stop_AI() if AI else self.decide_stop_human()
 
-    @staticmethod
-    def print_logo():
-        """ Prints a fancy logo for the application. """
-
-        print("   +~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~+")
-        print("  ~~~~:::::::::::::::::::::::::::::~~~~")
-        print("  ~~:::::::::::::::::::::::::::::::::::~~")
-        print("  ~:::::::::::::::::::::::::::::::::::::~=")
-        print("  ~::::::::::,::,:,::::,:::,:,::::::::::~=")
-        print("  :::~==++~,,,===,,,===,,==,=  =======:::=")
-        print("  ::=       ,=7   ,,=    =  : ,        ::=")
-        print("  :~=   ,,,,,=     ,=       ,,,,=    ::::=")
-        print("  ::I   ,,,,=  7   ,=       ,,,,=    ::::=")
-        print("  :::   ===:=       =  ,    ,,,,=    ,:::~")
-        print("  ,,:,,    ,  ,,,   ,  ,,,  ,,,,,    ,:,,~")
-        print("  ,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,~")
-        print("  ,,,,~~~~,~~~~~~~~~,,,,::,,,,~~~~~~,,,,,~")
-        print("  ,,=      =         ==      ,=       I,,~")
-        print("  ,,I    ,,,,,=    ,==   ,=   =    ,+  ,,~")
-        print("  ,,=     ,,,,=    ,=    ,=        =+  ,,~")
-        print("  ,,,,     ,,,=    ,=    ,=           ,,,=")
-        print("  ,,===    ,,,=    ,,=   ==   =    ,,,,,,=")
-        print("  :,,     ,,,,,    ,,,,      ,,    ,,,,,:=")
-        print("  :,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,:=")
-        print("  ::,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,::=")
-        print("  :::,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,:::")
-        print("  :::::,,,,,,,,,,,,,,,,,,,,,,,,,,,:::::")
-        print("   =:::::::::::::::::::::::::::::::::=")
-        print("     +===========================+")
-
-    # noinspection PyTypeChecker
     def display_board(self, pawns, bonzes):
         """ Print the game board.
 
@@ -587,3 +542,7 @@ class Jeu:
         print("Bravo ", end="")
         self.print_color(self.PAWNS_COLORS[winning_player], "Joueur {0}".format(winning_player + 1), "")
         print("!", end="")
+        
+    def get_n_players(self):
+        """ Return the number of players """
+        return len(self.players)

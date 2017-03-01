@@ -11,7 +11,6 @@ Prénom : Arthur
 Matricule : 000422751
 """
 
-import cantstopFunctions
 from Jeu import Jeu
 
 if __name__ == "__main__":
