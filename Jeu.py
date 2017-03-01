@@ -13,6 +13,8 @@ Matricule : 000422751
 """
 
 from GUI import GUI
+from GUI_Setup import GUI_Setup
+from Joueur import Joueur
 import itertools
 import random
 import time
@@ -34,32 +36,31 @@ class Jeu:
         self.N_DICE = 4
         self.N_BONZES = 3
         self.MAX_HEIGHT = max(self.HEIGHT.values())
-        self.PAWNS_COLORS = {
-            0: 31,  # Red
-            1: 32,  # Green
-            2: 33,  # Yellow
-            3: 34  # Blue
-        }
-        
-        self.SYMBOLS = {
-            "bonze": "O",  # Bonze symbol
-            "pawn": "I",  # Pawn symbol - Alternative chr(9873)
-            "invalid": "X",  # Invalid cell symbol
-            "empty": " "
-        }
         
         self.P = 0.5
         self.CSI = "\x1B["
         self.OFFSET = 2  # To account for the fact that the game board is indexed from 2 onwards
-        
-        self.gui = GUI()
+
         self.bonzes = {}
-        self.players = self.gui.setup_players()
+        
+        # Setup the players
+        self.gui_setup = GUI_Setup()
+        try:
+            self.gui_setup.app.exec_()
+            self.players = self.gui_setup.getPlayers()
+        except:
+            raise
+        
+        for i in range(len(self.players)):
+            self.players[i] = Joueur(i, self.players[i])
+
         self.pawns = [{} for _ in range(len(self.players))]
         self.blocked_routes = set()
         
         # Set a given seed for repeatability
         random.seed(17)
+        
+        self.gui = GUI()
 
     # Section 2.2.3 - Remaniement fonctions
     def check_top(self, player_pawns):
@@ -85,18 +86,14 @@ class Jeu:
         """ Implementation of a game round.
 
         Keyword arguments:
-        pawns -- Dictionary representing the pawns
-        bonzes -- Dictionary representing the bonzes
-        blocked_routes -- Set representing the blocked ways
         current_player -- Integer id of the current player
-        AI -- Boolean indicating whether the player is controlled by the AI or not
         """
 
         self.reset_bonzes()
         self.display_board(self.pawns, self.bonzes)
         stop_round = False
         game_won = False
-        AI = self.players[current_player]
+        AI = self.players[current_player].isAI()
         
         while not stop_round:
             if self.move_bonzes(self.choose_dice(self.throw_dice(), current_player),
@@ -119,18 +116,15 @@ class Jeu:
 
         return game_won
 
-    def move_bonzes(self, chosen_routes, blocked_routes, player_id):
+    def move_bonzes(self, chosen_routes, player_id):
         """ Implementation of the business logic to move bonzes.
 
         Keyword arguments:
         chosen_routes -- 2-tuple containing the chosen routes
-        pawns -- Dictionary representing the pawns
-            bonzes -- Dictionary representing the bonzes
-        blocked_routes -- Set representing the blocked ways
         current_player -- Integer id of the current player
         """
 
-        AI = self.players[player_id]
+        AI = self.players[player_id].isAI()
         successful_dice_throw = False
         routes_with_bonzes = []
         routes_to_place_bonzes = []
@@ -144,7 +138,7 @@ class Jeu:
                 routes_with_bonzes.append(route)
             # ... or not
             else:
-                if not (route in blocked_routes):
+                if not (route in self.blocked_routes):
                     routes_to_place_bonzes.append(route)
 
         # Move bonzes that are already present
@@ -296,16 +290,14 @@ class Jeu:
 
         return stop
 
-    def is_blocked(self, res_dice, blocked_routes):
+    def is_blocked(self, res_dice):
         """ Check whether a player is blocked or not.
 
         Keywords arguments:
         res_dice -- 4-tuple containing the result of the 4-dice throw
-        blocked_routes -- Set representing the blocked ways
-        bonzes -- Dictionary representing the bonzes
         """
 
-        available_routes = {i for i in range(2, 13)}.difference(blocked_routes)
+        available_routes = {i for i in range(2, 13)}.difference(self.blocked_routes)
         possible_routes = {sum(i) for i in itertools.combinations(res_dice, 2)}
         bonze_routes = {key for key in self.bonzes}
         return len(possible_routes.intersection(bonze_routes).intersection(available_routes)) == 0
@@ -361,7 +353,6 @@ class Jeu:
 
         Keywords arguments:
         route -- Integer representing the route to block
-        pawns -- Dictionary representing the pawns
         player_id -- Integer id of the current player
         """
         # Remove all the pawns that are in a blocked route
@@ -383,12 +374,10 @@ class Jeu:
                 return True
         return False
 
-    def save_pawns(self, bonzes, pawns, blocked_routes, current_player):
+    def save_pawns(self, bonzes, pawns, current_player):
         """ Function to replace the bonzes with the current player's pawns once his turn has ended.
 
         Keywords arguments:
-        bonzes -- Dictionary representing the bonzes
-        pawns -- Dictionary representing the pawns
         current_player -- Integer id of the current player
         """
         # Merge pawns and bonzes
@@ -402,7 +391,7 @@ class Jeu:
         for route in pawns[current_player]:
             # If one of the pawn reaches the top, then block the route and clean the route
             if pawns[current_player][route] == self.HEIGHT[route]:
-                blocked_routes.add(route)
+                self.blocked_routes.add(route)
                 self.clean_route(route, current_player)
 
                 self.reset_bonzes()
@@ -414,7 +403,7 @@ class Jeu:
         res_dice -- 4-tuple containing the result of the thrown dice
         current_player -- Integer id of the current player
         """
-        AI = self.players[current_player]
+        AI = self.players[current_player].isAI()
         return self.choose_dice_AI(res_dice, current_player) if AI else self.choose_dice_human(res_dice, current_player)
 
     def decide_stop(self, AI):

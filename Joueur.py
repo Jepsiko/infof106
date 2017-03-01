@@ -20,7 +20,12 @@ class Joueur:
         self.AI = AI
         
     def getID(self):
+        """ Return the ID of the player """
         return self.ID
     
     def isAI(self):
+        """ Return True is the player is an AI """
         return self.AI
+    
+    def __str__(self):
+        return ("Computer " if self.isAI() else "Player ") + str(self.getID())
