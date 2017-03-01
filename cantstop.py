@@ -17,13 +17,10 @@ from Jeu import Jeu
 if __name__ == "__main__":
     
     jeu = Jeu()
+    n_players = jeu.get_n_players()
     
     winning_player = -1
     current_player = 0
-    players_AI = cantstopFunctions.setup_players()
-    n_players = len(players_AI)
-    
-    bonzes, pawns, blocked_ways = cantstopFunctions.init(n_players)
     end_game = False
     
     while not end_game:
@@ -34,7 +31,7 @@ if __name__ == "__main__":
         # Display game board
         # cantstopFunctions.display_board(pawns,bonzes)
         
-        end_game = cantstopFunctions.game_round(pawns, bonzes, blocked_ways, current_player, players_AI[current_player])
+        end_game = jeu.game_round(current_player)
         
         # If a player has won the game, pick it as the game winner
         if end_game:
@@ -44,4 +41,4 @@ if __name__ == "__main__":
         current_player = (current_player + 1) % n_players
     
     # Show informations about the winning player
-    cantstopFunctions.print_winning_message(winning_player)
+    jeu.print_winning_message(winning_player)

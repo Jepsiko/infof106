@@ -22,32 +22,12 @@ class GUI(QtGui.QWidget):
         self.app = QtGui.QApplication(sys.argv)
         super(GUI, self).__init__()
 
-    def initPlayerBox(self, i):
-        playerBox = QtGui.QGroupBox('Player ' + str(i))
-    
-        userCB = QtGui.QRadioButton(playerBox)
-        userCB.setIcon(QtGui.QIcon('user.png'))
-        userCB.setText('User')
-    
-        cpuCB = QtGui.QRadioButton(playerBox)
-        cpuCB.setIcon(QtGui.QIcon('cpu.png'))
-        cpuCB.setText('CPU')
-        cpuCB.setChecked(True)
-    
-        if i > 2:
-            playerBox.setCheckable(True)
-            playerBox.setChecked(False)
-    
-        layout = QtGui.QHBoxLayout()
-        layout.addWidget(userCB)
-        layout.addWidget(cpuCB)
-    
-        playerBox.setLayout(layout)
-    
-        return playerBox
-
     def setup_players(self):
-    
+        """ Function performing the initialisation of the players list according to the preferences expressed by the
+        user. Returns a list of booleans indicating whether the player is controlled by the computer (True) or not
+        (False).
+        """
+        
         selectPlayersL = QtGui.QLabel(self)
         selectPlayersL.setText('Select Players')
         font = QtGui.QFont()
@@ -79,3 +59,30 @@ class GUI(QtGui.QWidget):
                 players.append(playerBox.findChildren(QtGui.QRadioButton)[1].isChecked())
     
         return players
+
+    @staticmethod
+    def initPlayerBox(i):
+        """ Create a playerBox with two radioButtons"""
+        playerBox = QtGui.QGroupBox('Player ' + str(i))
+    
+        userCB = QtGui.QRadioButton(playerBox)
+        userCB.setIcon(QtGui.QIcon('user.png'))
+        userCB.setText('User')
+    
+        cpuCB = QtGui.QRadioButton(playerBox)
+        cpuCB.setIcon(QtGui.QIcon('cpu.png'))
+        cpuCB.setText('CPU')
+        cpuCB.setChecked(True)
+    
+        if i > 2:
+            playerBox.setCheckable(True)
+            playerBox.setChecked(False)
+    
+        layout = QtGui.QHBoxLayout()
+        layout.addWidget(userCB)
+        layout.addWidget(cpuCB)
+    
+        playerBox.setLayout(layout)
+    
+        return playerBox
+    
