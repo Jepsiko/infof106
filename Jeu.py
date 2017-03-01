@@ -15,7 +15,6 @@ Matricule : 000422751
 from GUI import GUI
 import itertools
 import random
-import os
 import time
 
 
@@ -112,8 +111,8 @@ class Jeu:
         AI = self.players[current_player]
         
         while not stop_round:
-            if self.move_bonzes(self.choose_dice(self.throw_dice(), current_player, AI), self.pawns,
-                                self.bonzes, self.blocked_routes, current_player, AI):
+            if self.move_bonzes(self.choose_dice(self.throw_dice(), current_player),
+                                self.blocked_routes, current_player):
                 if self.check_top(self.pawns[current_player]):
                     stop_round = True
                     game_won = True
@@ -132,7 +131,7 @@ class Jeu:
 
         return game_won
 
-    def move_bonzes(self, chosen_routes, pawns, bonzes, blocked_routes, player_id, AI):
+    def move_bonzes(self, chosen_routes, blocked_routes, player_id):
         """ Implementation of the business logic to move bonzes.
 
         Keyword arguments:
@@ -141,19 +140,19 @@ class Jeu:
             bonzes -- Dictionary representing the bonzes
         blocked_routes -- Set representing the blocked ways
         current_player -- Integer id of the current player
-        AI -- Boolean indicating whether the player is controlled by the AI or not
         """
 
+        AI = self.players[player_id]
         successful_dice_throw = False
         routes_with_bonzes = []
         routes_to_place_bonzes = []
         # Count the number of available bonzes
-        available_bonzes = self.N_BONZES - len(bonzes)
+        available_bonzes = self.N_BONZES - len(self.bonzes)
 
         # Check selected routes
         for route in chosen_routes:
             # Whether a bonze is present...
-            if route in bonzes:
+            if route in self.bonzes:
                 routes_with_bonzes.append(route)
             # ... or not
             else:
@@ -162,17 +161,17 @@ class Jeu:
 
         # Move bonzes that are already present
         for route in routes_with_bonzes:
-            if bonzes[route] < self.HEIGHT[route]:
+            if self.bonzes[route] < self.HEIGHT[route]:
                 jump = 1
                 # If there are other players pawns, jump above them
-                while self.exists_pawn(route, bonzes[route] + jump, player_id):
+                while self.exists_pawn(route, self.bonzes[route] + jump, player_id):
                     jump += 1
             
                     # If the top is reached stop at the top
-                if (bonzes[route] + jump) > self.HEIGHT[route]:
-                    bonzes[route] = self.HEIGHT[route]
+                if (self.bonzes[route] + jump) > self.HEIGHT[route]:
+                    self.bonzes[route] = self.HEIGHT[route]
                 else:
-                    bonzes[route] += jump
+                    self.bonzes[route] += jump
         
                 successful_dice_throw = True
 
@@ -180,7 +179,7 @@ class Jeu:
         if len(routes_to_place_bonzes) >= 2:  # If there are 2 routes available
             if available_bonzes >= 2:  # And 2 or more bonzes to place
                 for route in routes_to_place_bonzes:  # Place both of them
-                    available_bonzes = self.place_bonze(route, pawns, bonzes, available_bonzes, player_id)
+                    available_bonzes = self.place_bonze(route, available_bonzes, player_id)
                     successful_dice_throw = True
             else:
                 # Otherwise, if there is only a single available bonze but multiple available ways
@@ -191,19 +190,19 @@ class Jeu:
                     else:
                         chosen_route = self.choose_route_AI(routes_to_place_bonzes)
 
-                    self.place_bonze(chosen_route, pawns, bonzes, available_bonzes, player_id)
+                    self.place_bonze(chosen_route, available_bonzes, player_id)
                     successful_dice_throw = True
 
         else:
             if len(routes_to_place_bonzes) == 1:
                 # If there is a single route available
                 if available_bonzes >= 1:  # And at least one available bonze
-                    self.place_bonze(routes_to_place_bonzes[0], pawns, bonzes, available_bonzes, player_id)
+                    self.place_bonze(routes_to_place_bonzes[0], available_bonzes, player_id)
                     successful_dice_throw = True
 
         return successful_dice_throw
 
-    def place_bonze(self, route, pawns, bonzes, available_bonzes, player_id):
+    def place_bonze(self, route, available_bonzes, player_id):
         """ Place a bonze in the selected route, skipping pawns if necessary.
 
         Keywords arguments
@@ -215,20 +214,20 @@ class Jeu:
         # If there is already a pawn of the player in the chosen route, put the bonze
         # after the pawn
         offset = -1
-        if route in pawns[player_id]:
+        if route in self.pawns[player_id]:
             # If the top is reached then stop at the top
-            if (pawns[player_id].get(route) + 1) > self.HEIGHT[route]:
-                bonzes[route] = self.HEIGHT[route]
+            if (self.pawns[player_id].get(route) + 1) > self.HEIGHT[route]:
+                self.bonzes[route] = self.HEIGHT[route]
             else:
-                bonzes[route] = pawns[player_id].get(route)
-                offset = bonzes[route]
+                self.bonzes[route] = self.pawns[player_id].get(route)
+                offset = self.bonzes[route]
         else:
             offset = 1
 
         # If there are other players pawns, jump above them
         while self.exists_pawn(route, offset, player_id):
             offset += 1
-        bonzes[route] = offset
+        self.bonzes[route] = offset
 
         return available_bonzes - 1
 
@@ -422,14 +421,14 @@ class Jeu:
 
                 self.reset_bonzes()
 
-    def choose_dice(self, res_dice, current_player, AI):
+    def choose_dice(self, res_dice, current_player):
         """ Wrapper function for the homonym functions for AI and human players.
 
         Keyword arguments:
         res_dice -- 4-tuple containing the result of the thrown dice
         current_player -- Integer id of the current player
-        AI -- Boolean indicating whether the player is controlled by the AI or not
         """
+        AI = self.players[current_player]
         return self.choose_dice_AI(res_dice, current_player) if AI else self.choose_dice_human(res_dice, current_player)
 
     def decide_stop(self, AI):
@@ -578,57 +577,6 @@ class Jeu:
             return None
 
         return index
-
-    def select_player_number_verification(self):
-        """ Verification of the input string for the choice of the number of players. """
-        valid_input = False
-        n_players = -1
-
-        while not valid_input:
-            # Clear screen
-            os.system('cls' if os.name == 'nt' else 'clear')
-            self.print_logo()
-            selection_string = input("\nVeuillez entrer le nombre des joueurs [2-4] : ")
-    
-            if len(selection_string) == 1 and selection_string.isdigit():
-                try:
-                    n_players = int(selection_string)
-                except ValueError:
-                    print("Erreur de conversion en entier - numéro des joueurs. Réessayer, svp.")
-                    time.sleep(1)
-                if 2 <= n_players <= 4:
-                    valid_input = True
-                else:
-                    print("Veuillez entrer un numero compris entre 2 et 4. Réessayer, svp.")
-                    time.sleep(1)
-            else:
-                print("Mauvais encodage du numero des joueurs. Réessayer, svp.")
-                time.sleep(1)
-
-        return n_players
-
-    def select_player_type_verification(self, index):
-        """ Verification of the input string for the choice of the player. """
-        valid_input = False
-        player_AI = False
-
-        while not valid_input:
-            # Clear screen
-            os.system('cls' if os.name == 'nt' else 'clear')
-            self.print_logo()
-            selection_string = input(
-                "\nVeuillez choisir le type du joueur {0} [(H)umain/(A)I] : ".format(index + 1))
-            if selection_string == "H":
-                player_AI = False
-                valid_input = True
-            elif selection_string == "A":
-                player_AI = True
-                valid_input = True
-            else:
-                print("Mauvais encodage du type des joueurs. Réessayer, svp.")
-                time.sleep(1)
-
-        return player_AI
 
     def print_winning_message(self, winning_player):
         """ Print the winning message for the player that won the game.
