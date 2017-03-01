@@ -12,8 +12,11 @@ Matricule : 000422751
 """
 
 import cantstopFunctions
+from Jeu import Jeu
 
 if __name__ == "__main__":
+    
+    jeu = Jeu()
     
     winning_player = -1
     current_player = 0

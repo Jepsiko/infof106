@@ -14,7 +14,7 @@ Matricule : 000422751
 
 import sys
 
-from PyQt4 import QtGui
+from PyQt4 import QtGui, QtCore
 
 
 class GUI(QtGui.QWidget):
