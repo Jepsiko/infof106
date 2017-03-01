@@ -12,7 +12,6 @@ Prénom : Arthur
 Matricule : 000422751
 """
 
-from GUI_Setup import GUI_Setup
 from GUI import GUI
 import cantstopFunctions
 
@@ -28,14 +27,11 @@ class Jeu:
         self.HEIGHT = {2: 3, 3: 5, 4: 7, 5: 9, 6: 11, 7: 13, 8: 11, 9: 9, 10: 7, 11: 5, 12: 3}
         self.P = 40  # Probabilité en pourcentage
         
-        self.gui_setup = GUI_Setup()
+        self.gui = GUI()
         self.bonzes = {}
-        self.players = self.gui_setup.setup_players()
-        self.gui_setup.destroy()
+        self.players = self.gui.setup_players()
         self.pawns = [{} for _ in range(len(self.players))]
         self.blocked_routes = set()
-        
-        self.gui = GUI()
         
         # Partie du prof
         winning_player = -1
