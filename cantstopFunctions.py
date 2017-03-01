@@ -47,8 +47,7 @@ random.seed(17)
 
 # Section 2.2.1 - Menu de configuration
 def setup_players():
-    """
-    Function performing the initialisation of the players list according to the preferences expressed by the
+    """ Function performing the initialisation of the players list according to the preferences expressed by the
     user. Returns a list of booleans indicating whether the player is controlled by the computer (True) or not (
     False).
     """
@@ -67,7 +66,7 @@ def setup_players():
 
 def print_color(color, text, sep):
     """ Prints colored text
- 
+
     Keyword arguments:
     color -- Integer representing the ANSI code of the color
     text -- String to be colored
@@ -76,10 +75,10 @@ def print_color(color, text, sep):
     print(CSI + str(color) + "m" + text + CSI + "0m", end=sep)
 
 
-# Section 2.2.3 - Remaniement fonctions 
+# Section 2.2.3 - Remaniement fonctions
 def check_top(player_pawns):
     """ Check if three pawns/bonzes have reached simultaneously the top of the corresponding routes.
- 
+
     Keyword arguments:
         bonzes -- Dictionary representing the pawns/bonzes
     """
@@ -99,7 +98,7 @@ def check_top(player_pawns):
 
 def game_round(pawns, bonzes, blocked_routes, current_player, AI):
     """ Implementation of a game round.
-    
+
     Keyword arguments:
     pawns -- Dictionary representing the pawns
     bonzes -- Dictionary representing the bonzes
@@ -137,7 +136,7 @@ def game_round(pawns, bonzes, blocked_routes, current_player, AI):
 
 def move_bonzes(chosen_routes, pawns, bonzes, blocked_routes, player_id, AI):
     """ Implementation of the business logic to move bonzes.
- 
+
     Keyword arguments:
     chosen_routes -- 2-tuple containing the chosen routes
     pawns -- Dictionary representing the pawns
@@ -155,7 +154,7 @@ def move_bonzes(chosen_routes, pawns, bonzes, blocked_routes, player_id, AI):
     
     # Check selected routes
     for route in chosen_routes:
-        # Whether a bonze is present...       
+        # Whether a bonze is present...
         if route in bonzes:
             routes_with_bonzes.append(route)
         # ... or not
@@ -167,7 +166,7 @@ def move_bonzes(chosen_routes, pawns, bonzes, blocked_routes, player_id, AI):
     for route in routes_with_bonzes:
         if bonzes[route] < HEIGHT[route]:
             jump = 1
-            # If there are other players pawns, jump above them 
+            # If there are other players pawns, jump above them
             while exists_pawn(route, bonzes[route] + jump, pawns, player_id):
                 jump += 1
                 
@@ -208,9 +207,8 @@ def move_bonzes(chosen_routes, pawns, bonzes, blocked_routes, player_id, AI):
 
 
 def place_bonze(route, pawns, bonzes, available_bonzes, player_id):
-    """
-    Place a bonze in the selected route, skipping pawns if necessary.
-    
+    """ Place a bonze in the selected route, skipping pawns if necessary.
+
     Keywords arguments
     route -- Integer representing the target route
     pawns -- Dictionary representing the pawns
@@ -230,7 +228,7 @@ def place_bonze(route, pawns, bonzes, available_bonzes, player_id):
     else:
         offset = 1
     
-    # If there are other players pawns, jump above them 
+    # If there are other players pawns, jump above them
     while exists_pawn(route, offset, pawns, player_id):
         offset += 1
     bonzes[route] = offset
@@ -240,10 +238,10 @@ def place_bonze(route, pawns, bonzes, available_bonzes, player_id):
 
 # Section 2.2.3 - Autres fonctions
 
+# noinspection PyTypeChecker
 def choose_dice_human(res_dice, player_id):
-    """
-    Choice of the pair of dice that should be chosen to advance the bonzes - Human Version
-    
+    """ Choice of the pair of dice that should be chosen to advance the bonzes - Human Version
+
     Keywords arguments:
     res_dice -- 4-tuple containing the result of the 4-dice throw
     player_id -- Integer id of the current player
@@ -261,9 +259,8 @@ def choose_dice_human(res_dice, player_id):
 
 
 def choose_route_human(available_routes):
-    """
-    Implementation of the random choice among different available routes. - Human version
-    
+    """ Implementation of the random choice among different available routes. - Human version
+
     Keywords arguments:
     available_routes -- 2-tuple containing the routes among which the route should be chosen
     """
@@ -293,8 +290,7 @@ def choose_route_human(available_routes):
 
 
 def decide_stop_human():
-    """
-    Implementation of the decision whether to stop or not at the end of a game round - Human version
+    """ Implementation of the decision whether to stop or not at the end of a game round - Human version
     """
     valid_input = False
     stop = False
@@ -318,13 +314,12 @@ def decide_stop_human():
 
 
 def is_blocked(res_dice, blocked_routes, bonzes):
-    """
-    Check whether a player is blocked or not.
+    """ Check whether a player is blocked or not.
 
     Keywords arguments:
     res_dice -- 4-tuple containing the result of the 4-dice throw
     blocked_routes -- Set representing the blocked ways
-    bonzes -- Dictionary representing the bonzes 
+    bonzes -- Dictionary representing the bonzes
     """
     
     available_routes = {i for i in range(2, 13)}.difference(blocked_routes)
@@ -336,9 +331,8 @@ def is_blocked(res_dice, blocked_routes, bonzes):
 # Section 2.2.4 - AI
 
 def choose_dice_AI(res_dice, player_id):
-    """
-    Choice of the pair of dice that should be chosen to advance the bonzes - AI Version
-    
+    """ Choice of the pair of dice that should be chosen to advance the bonzes - AI Version
+
     Keywords arguments:
     res_dice -- 4-tuple containing the result of the 4-dice throw
     player_id -- Integer id of the current player
@@ -352,9 +346,8 @@ def choose_dice_AI(res_dice, player_id):
 
 
 def choose_route_AI(available_routes):
-    """
-    Implementation of the random choice among different available routes. - AI version
-    
+    """ Implementation of the random choice among different available routes. - AI version
+
     Keywords arguments:
     available_routes -- 2-tuple containing the chosen routes
     """
@@ -362,17 +355,14 @@ def choose_route_AI(available_routes):
 
 
 def decide_stop_AI():
-    """
-    Implementation of the random decision between stopping the game round or continuing it. - AI version.
-    """
+    """ Implementation of the random decision between stopping the game round or continuing it. - AI version. """
     return False if random.random() < P else True
 
 
 # Fonctions Partie 1
 
 def init(n_pawns):
-    """
-    Initialisation of all the variables needed for the game.
+    """ Initialisation of all the variables needed for the game.
 
     Keywords arguments:
     n_pawns -- Integer representing the number of players
@@ -389,8 +379,7 @@ def init(n_pawns):
 
 
 def reset_bonzes(bonzes):
-    """
-    Empties the bonzes dictionary.
+    """ Empties the bonzes dictionary.
 
     Keywords arguments:
     bonzes -- Dictionary representing the bonzes
@@ -399,17 +388,14 @@ def reset_bonzes(bonzes):
 
 
 def throw_dice():
-    """
-    Simulate a 4-dice throw.
-    """
+    """ Simulate a 4-dice throw. """
     return tuple(random.randint(MIN_DICE, MAX_DICE) for _ in range(N_DICE))
 
 
 # Auxiliary functions
 
 def clean_route(route, pawns, player_id):
-    """
-    Clean a route (remove all the pawns) once one pawn has reached the top and blocked it.
+    """ Clean a route (remove all the pawns) once one pawn has reached the top and blocked it.
 
     Keywords arguments:
     route -- Integer representing the route to block
@@ -423,8 +409,7 @@ def clean_route(route, pawns, player_id):
 
 
 def exists_pawn(route, height, pawns, player_id):
-    """
-    Verify whether a pawn exists in a given position of the game board.
+    """ Verify whether a pawn exists in a given position of the game board.
 
     Keywords arguments:
     route -- Integer representing the route to verify
@@ -439,8 +424,7 @@ def exists_pawn(route, height, pawns, player_id):
 
 
 def save_pawns(bonzes, pawns, blocked_routes, current_player):
-    """
-    Function to replace the bonzes with the current player's pawns once his turn has ended.
+    """ Function to replace the bonzes with the current player's pawns once his turn has ended.
 
     Keywords arguments:
     bonzes -- Dictionary representing the bonzes
@@ -465,8 +449,7 @@ def save_pawns(bonzes, pawns, blocked_routes, current_player):
 
 
 def choose_dice(res_dice, current_player, AI):
-    """
-    Wrapper function for the homonym functions for AI and human players.
+    """ Wrapper function for the homonym functions for AI and human players.
 
     Keyword arguments:
     res_dice -- 4-tuple containing the result of the thrown dice
@@ -477,8 +460,7 @@ def choose_dice(res_dice, current_player, AI):
 
 
 def decide_stop(AI):
-    """
-    Wrapper function for the homonym functions for AI and human players.c
+    """ Wrapper function for the homonym functions for AI and human players.c
     Keyword arguments:
     AI -- Boolean indicating whether the player is controlled by the AI or not
     """
@@ -515,16 +497,16 @@ def print_logo():
     print("     +===========================+")
 
 
+# noinspection PyTypeChecker
 def display_board(pawns, bonzes):
-    """
-    Print the game board.
- 
+    """ Print the game board.
+
     Keyword arguments:
     pawns -- Dictionary representing the pawns
         bonzes -- Dictionary representing the bonzes
     """
     # Initialize board
-    board = [[SYMBOLS["invalid"] for j in range(len(HEIGHT.keys()))] for i in range(MAX_HEIGHT + 1)]
+    board = [[SYMBOLS["invalid"] for _ in range(len(HEIGHT.keys()))] for _ in range(MAX_HEIGHT + 1)]
     
     # os.system('cls' if os.name == 'nt' else 'clear')
     # print_logo()
@@ -569,8 +551,7 @@ def display_board(pawns, bonzes):
 
 
 def select_dice_verification(selection_string):
-    """
-    Verification of the input string, checking that the string has the correct length, does not contains
+    """ Verification of the input string, checking that the string has the correct length, does not contains
     duplicates, nor non-numeric characters. Return a list of tuple (row_index,col_index= with one element for every
     card encoded by the user.
     """
@@ -604,8 +585,7 @@ def select_dice_verification(selection_string):
 
 
 def select_die_verification(die_str):
-    """
-    Verification of the input string, checking that the string has the correct length, does not contains
+    """ Verification of the input string, checking that the string has the correct length, does not contains
     duplicates, nor non-numeric characters. Return a list of tuple (row_index,col_index= with one element for every
     card encoded by the user.
     """
@@ -632,7 +612,7 @@ def select_die_verification(die_str):
 def select_player_number_verification():
     """ Verification of the input string for the choice of the number of players. """
     valid_input = False
-    n_players = 0
+    n_players = -1
     
     while not valid_input:
         # Clear screen
@@ -682,9 +662,8 @@ def select_player_type_verification(index):
 
 
 def print_winning_message(winning_player):
-    """
-    Print the winning message for the player that won the game.
- 
+    """ Print the winning message for the player that won the game.
+
     Keyword arguments:
     winning_player - Integer id of the winning player
     """

@@ -18,9 +18,7 @@ import cantstopFunctions
 
 
 class Jeu:
-    """
-    Classe qui gère le jeu complet
-    """
+    """Classe qui gère le jeu complet"""
     
     def __init__(self):
         """
