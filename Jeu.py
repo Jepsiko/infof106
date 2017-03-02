@@ -94,7 +94,7 @@ class Jeu:
         
         while not stop_round:
             if self.move_bonzes(self.choose_dice(self.throw_dice(), current_player),
-                                self.blocked_routes, current_player):
+                                current_player):
                 if self.check_top(self.pawns[current_player]):
                     stop_round = True
                     game_won = True
@@ -105,7 +105,7 @@ class Jeu:
                     stop_round = self.decide_stop(AI)
         
                 if stop_round:
-                    self.save_pawns(self.bonzes, self.pawns, self.blocked_routes, current_player)
+                    self.save_pawns(current_player)
     
             else:
                 print("Vous êtes bloqué !")
@@ -222,15 +222,15 @@ class Jeu:
         dice_index_selected = None
 
         while dice_index_selected is None:
-            self.print_color(self.PAWNS_COLORS[player_id], "[Joueur {0}]".format(player_id + 1), " ")
+            # self.print_color(self.PAWNS_COLORS[player_id], "[Joueur {0}]".format(player_id + 1), " ")
             selection_string = input(
                 "Choisir les indices des premières deux dés -> {1} : ".format(player_id + 1, res_dice))
             dice_index_selected = self.select_dice_verification(selection_string)
 
         dice_index_not_selected = [i for i in range(self.N_DICE) if i not in dice_index_selected]
 
-        return tuple(
-            (sum([res_dice[x] for x in dice_index_selected]), sum([res_dice[x] for x in dice_index_not_selected])))
+        return tuple((sum([res_dice[x] for x in dice_index_selected]),
+                      sum([res_dice[x] for x in dice_index_not_selected])))
 
     @staticmethod
     def choose_route_human(available_routes):
@@ -313,7 +313,7 @@ class Jeu:
         res_dice -- 4-tuple containing the result of the 4-dice throw
         player_id -- Integer id of the current player
         """
-        self.print_color(self.PAWNS_COLORS[player_id], "[Joueur {0}]".format(player_id + 1), " ")
+        # self.print_color(self.PAWNS_COLORS[player_id], "[Joueur {0}]".format(player_id + 1), " ")
         "En train de choisir les indices des premières deux dés -> {1} : ".format(player_id + 1, res_dice)
         time.sleep(1)
         shuffled_dices = list(res_dice)
@@ -376,23 +376,23 @@ class Jeu:
                 return True
         return False
 
-    def save_pawns(self, bonzes, pawns, current_player):
+    def save_pawns(self, current_player):
         """ Function to replace the bonzes with the current player's pawns once his turn has ended.
 
         Keywords arguments:
         current_player -- Integer id of the current player
         """
         # Merge pawns and bonzes
-        if not pawns[current_player]:
-            pawns[current_player] = bonzes.copy()
+        if not self.pawns[current_player]:
+            self.pawns[current_player] = self.bonzes.copy()
         else:
-            pawns[current_player].update(bonzes)
+            self.pawns[current_player].update(self.bonzes)
 
         # pawns[current_player] = {**pawns[current_player], **bonzes}
 
-        for route in pawns[current_player]:
+        for route in self.pawns[current_player]:
             # If one of the pawn reaches the top, then block the route and clean the route
-            if pawns[current_player][route] == self.HEIGHT[route]:
+            if self.pawns[current_player][route] == self.HEIGHT[route]:
                 self.blocked_routes.add(route)
                 self.clean_route(route, current_player)
 
@@ -423,7 +423,7 @@ class Jeu:
             bonzes -- Dictionary representing the bonzes
         """
         # Initialize board
-        board = [[self.SYMBOLS["invalid"] for _ in range(len(self.HEIGHT.keys()))] for _ in range(self.MAX_HEIGHT + 1)]
+        board = [["?" for _ in range(len(self.HEIGHT.keys()))] for _ in range(self.MAX_HEIGHT + 1)]
 
         # os.system('cls' if os.name == 'nt' else 'clear')
         # print_logo()
@@ -436,23 +436,24 @@ class Jeu:
 
         # Put the bonzes in the proper positions
         for b in bonzes:
-            board[bonzes[b]][b - self.OFFSET] = self.SYMBOLS["bonze"]
+            board[bonzes[b]][b - self.OFFSET] = "O"
 
         # Put the pawns in the proper positions
         for pawns_player in pawns:
             for p in pawns_player:
-                board[pawns_player[p]][p - self.OFFSET] = self.SYMBOLS["pawn"]
+                board[pawns_player[p]][p - self.OFFSET] = "I"
 
         # Print the board in reversed order as required
         for i in reversed(range(1, self.MAX_HEIGHT + 1)):
             print(str(i), end="\t")
             for j in range(len(self.HEIGHT.keys())):
                 for symbol in board[i][j]:
-                    if symbol == self.SYMBOLS["pawn"]:
+                    if symbol == "X":
                         for k in range(len(pawns)):
                             if pawns[k].get(j + self.OFFSET) == i:
+                                pass
                                 # Avoid raising KeyError exception returning a default -1
-                                self.print_color(self.PAWNS_COLORS[k], str(symbol), "")
+                                # self.print_color(self.PAWNS_COLORS[k], str(symbol), "")
                     else:
                         print(str(symbol), end="")
                 print("\t", end="")
@@ -531,7 +532,7 @@ class Jeu:
         winning_player - Integer id of the winning player
         """
         print("Bravo ", end="")
-        self.print_color(self.PAWNS_COLORS[winning_player], "Joueur {0}".format(winning_player + 1), "")
+        # self.print_color(self.PAWNS_COLORS[winning_player], "Joueur {0}".format(winning_player + 1), "")
         print("!", end="")
         
     def get_n_players(self):

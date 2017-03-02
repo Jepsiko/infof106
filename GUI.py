@@ -25,6 +25,7 @@ class GUI(QtGui.QWidget):
         self.res_dice = []
         self.dices = []
         self.checkBoxes = []
+        self.freeRoutes = 3
         
         self.diceButton = QtGui.QPushButton()
         self.stopButton = QtGui.QPushButton()
@@ -128,7 +129,7 @@ class GUI(QtGui.QWidget):
         QtCore.QObject.connect(self.goButton, QtCore.SIGNAL("clicked()"), self.go)
         
         freeL = QtGui.QLabel(chooseRouteBox)
-        freeL.setText("Free: 0")
+        freeL.setText("Free: " + str(self.freeRoutes))
         
         goFreeLayout = QtGui.QVBoxLayout()
         goFreeLayout.addWidget(self.goButton)
@@ -181,6 +182,9 @@ class GUI(QtGui.QWidget):
         self.diceButton.setEnabled(False)
         self.stopButton.setEnabled(False)
         
+        if self.jeu.is_blocked(self.res_dice):
+            print("bloqué")
+        
     def clear_dice(self):
         """ Clear the diceBox """
         for i in range(len(self.dices)):
@@ -188,7 +192,7 @@ class GUI(QtGui.QWidget):
 
     def go(self):
         """ Action when we push the Go Button """
-        
+
         self.diceButton.setEnabled(True)
         self.stopButton.setEnabled(True)
         self.clear_dice()
