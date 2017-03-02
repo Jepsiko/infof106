@@ -53,6 +53,7 @@ class GUI_Setup(QtGui.QWidget):
         
         self.setLayout(layout)
         self.setWindowTitle('Setup Game')
+        self.setWindowIcon(QtGui.QIcon("monk.png"))
         
     @staticmethod
     def initPlayerBox(i):

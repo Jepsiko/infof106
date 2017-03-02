@@ -13,9 +13,7 @@ Matricule : 000422751
 """
 
 import sys
-from PyQt4 import QtCore
-
-from PyQt4 import QtGui
+from PyQt4 import QtGui, QtCore
 from Jeu import Jeu
 
 
@@ -29,6 +27,8 @@ class GUI(QtGui.QWidget):
         self.checkBoxes = []
         
         self.diceButton = QtGui.QPushButton()
+        self.stopButton = QtGui.QPushButton()
+        self.goButton = QtGui.QPushButton()
         self.board = QtGui.QPixmap()
         
         self.app = QtGui.QApplication(sys.argv)
@@ -36,7 +36,6 @@ class GUI(QtGui.QWidget):
         super(GUI, self).__init__()
         
         self.setup_ui()
-        self.roll_dice()
         
         self.show()
         self.app.exec_()
@@ -56,6 +55,8 @@ class GUI(QtGui.QWidget):
         mainLayout.addWidget(canevas)
         mainLayout.addLayout(infoLayout)
         self.setLayout(mainLayout)
+        self.setWindowTitle("Can't Stop")
+        self.setWindowIcon(QtGui.QIcon("monk.png"))
     
     def display_board(self):
         pass
@@ -91,12 +92,12 @@ class GUI(QtGui.QWidget):
         self.diceButton.setIcon(QtGui.QIcon("dice.png"))
         QtCore.QObject.connect(self.diceButton, QtCore.SIGNAL('clicked()'), self.roll_dice)
         
-        stopB = QtGui.QPushButton(turnBox)
-        stopB.setIcon(QtGui.QIcon("stop.png"))
+        self.stopButton = QtGui.QPushButton(turnBox)
+        self.stopButton.setIcon(QtGui.QIcon("stop.png"))
         
         layoutButton = QtGui.QHBoxLayout()
         layoutButton.addWidget(self.diceButton)
-        layoutButton.addWidget(stopB)
+        layoutButton.addWidget(self.stopButton)
         
         layout = QtGui.QVBoxLayout()
         layout.addWidget(playerTurnL)
@@ -117,19 +118,20 @@ class GUI(QtGui.QWidget):
         font.setPixelSize(20)
         chooseRouteL.setFont(font)
         
-        goButton = QtGui.QPushButton(chooseRouteBox)
-        goButton.setIcon(QtGui.QIcon("monk.png"))
-        goButton.setText("GO!")
+        self.goButton = QtGui.QPushButton(chooseRouteBox)
+        self.goButton.setIcon(QtGui.QIcon("monk.png"))
+        self.goButton.setText("GO!")
         font = QtGui.QFont()
         font.setBold(True)
         font.setUnderline(True)
-        goButton.setFont(font)
+        self.goButton.setFont(font)
+        QtCore.QObject.connect(self.goButton, QtCore.SIGNAL("clicked()"), self.go)
         
         freeL = QtGui.QLabel(chooseRouteBox)
         freeL.setText("Free: 0")
         
         goFreeLayout = QtGui.QVBoxLayout()
-        goFreeLayout.addWidget(goButton)
+        goFreeLayout.addWidget(self.goButton)
         goFreeLayout.addWidget(freeL)
         
         subLayout = QtGui.QHBoxLayout()
@@ -177,3 +179,17 @@ class GUI(QtGui.QWidget):
                     self.checkBoxes[x][y].setCheckable(False)
 
         self.diceButton.setEnabled(False)
+        self.stopButton.setEnabled(False)
+        
+    def clear_dice(self):
+        """ Clear the diceBox """
+        for i in range(len(self.dices)):
+            self.dices[i].clear()
+
+    def go(self):
+        """ Action when we push the Go Button """
+        
+        self.diceButton.setEnabled(True)
+        self.stopButton.setEnabled(True)
+        self.clear_dice()
+        self.display_board()
