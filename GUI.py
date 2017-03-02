@@ -13,16 +13,31 @@ Matricule : 000422751
 """
 
 import sys
+from PyQt4 import QtCore
+
 from PyQt4 import QtGui
+from Jeu import Jeu
 
 
 class GUI(QtGui.QWidget):
     """ Class that handle the graphique side of the game """
     
     def __init__(self):
+        self.jeu = Jeu()
+        self.res_dice = []
+        self.dices = []
+        self.checkBoxes = []
+        
+        self.diceButton = QtGui.QPushButton()
+        self.board = QtGui.QPixmap()
+        
         self.app = QtGui.QApplication(sys.argv)
+        self.app.setStyleSheet("QGroupBox {border: 1px solid gray;}")
         super(GUI, self).__init__()
+        
         self.setup_ui()
+        self.roll_dice()
+        
         self.show()
         self.app.exec_()
     
@@ -31,11 +46,9 @@ class GUI(QtGui.QWidget):
         
         canevas = QtGui.QLabel(self)
         canevas.setText("Board")
-               
-        diceBox = QtGui.QGroupBox()
 
         infoLayout = QtGui.QHBoxLayout()
-        infoLayout.addWidget(diceBox)
+        infoLayout.addWidget(self.setup_diceBox())
         infoLayout.addWidget(self.setup_turnBox())
         infoLayout.addWidget(self.setup_chooseRouteBox())
 
@@ -47,8 +60,21 @@ class GUI(QtGui.QWidget):
     def display_board(self):
         pass
     
-    @staticmethod
-    def setup_turnBox():
+    def setup_diceBox(self):
+        """ Setup the diceBox """
+        diceBox = QtGui.QGroupBox()
+        
+        layout = QtGui.QGridLayout()
+        
+        for x in range(4):
+            label = QtGui.QLabel(diceBox)
+            self.dices.append(label)
+            layout.addWidget(label, x % 2, x)
+        diceBox.setLayout(layout)
+        
+        return diceBox
+    
+    def setup_turnBox(self):
         """ Setup the TurnBox """
         turnBox = QtGui.QGroupBox()
         
@@ -61,14 +87,15 @@ class GUI(QtGui.QWidget):
         font.setPixelSize(20)
         playerTurnL.setFont(font)
         
-        rollDiceB = QtGui.QPushButton(turnBox)
-        rollDiceB.setIcon(QtGui.QIcon("dice.png"))
+        self.diceButton = QtGui.QPushButton(turnBox)
+        self.diceButton.setIcon(QtGui.QIcon("dice.png"))
+        QtCore.QObject.connect(self.diceButton, QtCore.SIGNAL('clicked()'), self.roll_dice)
         
         stopB = QtGui.QPushButton(turnBox)
         stopB.setIcon(QtGui.QIcon("stop.png"))
         
         layoutButton = QtGui.QHBoxLayout()
-        layoutButton.addWidget(rollDiceB)
+        layoutButton.addWidget(self.diceButton)
         layoutButton.addWidget(stopB)
         
         layout = QtGui.QVBoxLayout()
@@ -78,8 +105,7 @@ class GUI(QtGui.QWidget):
         
         return turnBox
     
-    @staticmethod
-    def setup_chooseRouteBox():
+    def setup_chooseRouteBox(self):
         """ Setup the chooseRouteBox """
         
         chooseRouteBox = QtGui.QGroupBox()
@@ -91,10 +117,63 @@ class GUI(QtGui.QWidget):
         font.setPixelSize(20)
         chooseRouteL.setFont(font)
         
-        # TODO : Setup the radioBoxes, the button GO and the label Free
+        goButton = QtGui.QPushButton(chooseRouteBox)
+        goButton.setIcon(QtGui.QIcon("monk.png"))
+        goButton.setText("GO!")
+        font = QtGui.QFont()
+        font.setBold(True)
+        font.setUnderline(True)
+        goButton.setFont(font)
+        
+        freeL = QtGui.QLabel(chooseRouteBox)
+        freeL.setText("Free: 0")
+        
+        goFreeLayout = QtGui.QVBoxLayout()
+        goFreeLayout.addWidget(goButton)
+        goFreeLayout.addWidget(freeL)
+        
+        subLayout = QtGui.QHBoxLayout()
+        subLayout.addLayout(self.setup_checkBoxes())
+        subLayout.addLayout(goFreeLayout)
         
         layout = QtGui.QVBoxLayout()
         layout.addWidget(chooseRouteL)
+        layout.addLayout(subLayout)
         chooseRouteBox.setLayout(layout)
         
         return chooseRouteBox
+    
+    def setup_checkBoxes(self):
+        """ Setup the checkBoxes with all the radioButtons """
+        grid = QtGui.QGridLayout()
+        for x in range(2):
+            listeCB = []
+            for y in range(3):
+                checkB = QtGui.QCheckBox()
+                listeCB.append(checkB)
+                grid.addWidget(checkB, y, x)
+            self.checkBoxes.append(listeCB)
+                
+        return grid
+    
+    def roll_dice(self):
+        """ Roll the dices and update the images and the checkButtons's text"""
+        self.res_dice = self.jeu.throw_dice()
+            
+        combinaisons = self.jeu.get_combinaisons(self.res_dice)
+        nbCombi = len(combinaisons)
+        
+        for i in range(len(self.dices)):
+            image = QtGui.QPixmap("dice" + str(self.res_dice[i]) + ".png")
+            self.dices[i].setPixmap(image)
+        
+        for x in range(2):
+            for y in range(3):
+                if (nbCombi % 2)-1 == 0 == x and y == nbCombi//2 or y < nbCombi//2:
+                    self.checkBoxes[x][y].setText(str(combinaisons.pop()))
+                    self.checkBoxes[x][y].setCheckable(True)
+                else:
+                    self.checkBoxes[x][y].setText("")
+                    self.checkBoxes[x][y].setCheckable(False)
+
+        self.diceButton.setEnabled(False)

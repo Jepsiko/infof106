@@ -11,11 +11,12 @@ Prénom : Arthur
 Matricule : 000422751
 """
 
-from Jeu import Jeu
+from GUI import GUI
 
 if __name__ == "__main__":
     
-    jeu = Jeu()
+    gui = GUI()
+    """
     n_players = jeu.get_n_players()
     
     winning_player = -1
@@ -41,3 +42,4 @@ if __name__ == "__main__":
     
     # Show informations about the winning player
     jeu.print_winning_message(winning_player)
+"""

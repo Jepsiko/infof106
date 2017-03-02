@@ -12,7 +12,6 @@ Prénom : Arthur
 Matricule : 000422751
 """
 
-from GUI import GUI
 from GUI_Setup import GUI_Setup
 from Joueur import Joueur
 import itertools
@@ -58,9 +57,7 @@ class Jeu:
         self.blocked_routes = set()
         
         # Set a given seed for repeatability
-        random.seed(17)
-        
-        self.gui = GUI()
+        # random.seed(17)
 
     # Section 2.2.3 - Remaniement fonctions
     def check_top(self, player_pawns):
@@ -298,9 +295,14 @@ class Jeu:
         """
 
         available_routes = {i for i in range(2, 13)}.difference(self.blocked_routes)
-        possible_routes = {sum(i) for i in itertools.combinations(res_dice, 2)}
+        possible_routes = self.get_combinaisons(res_dice)
         bonze_routes = {key for key in self.bonzes}
         return len(possible_routes.intersection(bonze_routes).intersection(available_routes)) == 0
+    
+    @staticmethod
+    def get_combinaisons(res_dice):
+        """ Return all the possible sums of the res_dice """
+        return {sum(i) for i in itertools.combinations(res_dice, 2)}
 
     # Section 2.2.4 - AI
 

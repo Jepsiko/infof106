@@ -59,22 +59,22 @@ class GUI_Setup(QtGui.QWidget):
         """ Create a playerBox with two radioButtons"""
         playerBox = QtGui.QGroupBox('Player ' + str(i))
         
-        userCB = QtGui.QRadioButton(playerBox)
-        userCB.setIcon(QtGui.QIcon('user.png'))
-        userCB.setText('User')
+        userRB = QtGui.QRadioButton(playerBox)
+        userRB.setIcon(QtGui.QIcon('user.png'))
+        userRB.setText('User')
         
-        cpuCB = QtGui.QRadioButton(playerBox)
-        cpuCB.setIcon(QtGui.QIcon('cpu.png'))
-        cpuCB.setText('CPU')
-        cpuCB.setChecked(True)
+        cpuRB = QtGui.QRadioButton(playerBox)
+        cpuRB.setIcon(QtGui.QIcon('cpu.png'))
+        cpuRB.setText('CPU')
+        cpuRB.setChecked(True)
         
         if i > 2:
             playerBox.setCheckable(True)
             playerBox.setChecked(False)
         
         layout = QtGui.QHBoxLayout()
-        layout.addWidget(userCB)
-        layout.addWidget(cpuCB)
+        layout.addWidget(userRB)
+        layout.addWidget(cpuRB)
         
         playerBox.setLayout(layout)
         
@@ -85,6 +85,7 @@ class GUI_Setup(QtGui.QWidget):
         players = []
         for playerBox in self.playerBoxes:
             if not playerBox.isCheckable() or playerBox.isChecked():
+                # I look at the second QRadioButton, the cpuRB
                 players.append(playerBox.findChildren(QtGui.QRadioButton)[1].isChecked())
         
         return players
