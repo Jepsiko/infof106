@@ -1,540 +1,149 @@
-#!/usr/bin/python
 # -*- coding: utf-8 -*-
-
-
 """
-INFO-F106
-Can't Stop - Partie 3
-Fichier : Jeu.py
-
-Nom : Pierrot
-Prénom : Arthur
-Matricule : 000422751
+THIS FILE CONTAINS THE CLASS JEU
 """
 
-from GUI_Setup import GUI_Setup
-from Joueur import Joueur
-import itertools
-import random
 import time
 
+from Joueur import *
 
-class Jeu:
-    """Class that handle the whole game"""
+__author__ = "Luciano Porretta"
+__copyright__ = "Copyright 2017, Luciano Porretta"
+__credits__ = ["Luciano Porretta "]
+__license__ = "ULB Theaching License"
+__version__ = "1.0"
+__maintainer__ = "Luciano Porretta"
+__email__ = "luciano.porretta@ulb.ac.be"
+__status__ = "Beta"
+
+
+class Jeu(object):
+    def __init__(self, ui):
+        self.n_players = None
+        self.end_game = False
+        self.winning_player = None
+        self._active_players = None
+        self.players = {}
+        self._colors = {1: 'Red', 2: 'Green', 3: 'Blue', 4: 'Yellow'}
+        self._round = 0
+        self._game_won = None
+        
+        self._ui = ui
+        self._ui.RollButton.clicked.connect(self.RollButtonHandler)
+        self._ui.StopButton.clicked.connect(self.StopButtonHandler)
+        self._ui.GoButton.clicked.connect(self.GoButtonHandler)
     
-    def __init__(self):
-        """ Initialisation of all the variables needed for the game.
+    def wait_end_round(self, n):
+        """This method refresh the Main Windows catching all the events""
+        Parameters
+        ----------
+        n : int
+        """
+        while not self.players[n]._end_round:
+            QtGui.qApp.processEvents()
+            time.sleep(0.05)
     
-        Keywords arguments:
-        n_pawns -- Integer representing the number of players
-        """
-        
-        self.HEIGHT = {2: 3, 3: 5, 4: 7, 5: 9, 6: 11, 7: 13, 8: 11, 9: 9, 10: 7, 11: 5, 12: 3}  # voie_id : h_max
-        self.MIN_DICE = 1
-        self.MAX_DICE = 6
-        self.N_DICE = 4
-        self.N_BONZES = 3
-        self.MAX_HEIGHT = max(self.HEIGHT.values())
-        
-        self.P = 0.5
-        self.CSI = "\x1B["
-        self.OFFSET = 2  # To account for the fact that the game board is indexed from 2 onwards
-
-        self.bonzes = {}
-        
-        # Setup the players
-        self.gui_setup = GUI_Setup()
-        try:
-            self.gui_setup.app.exec_()
-            self.players = self.gui_setup.getPlayers()
-        except:
-            raise
-        
-        for i in range(len(self.players)):
-            self.players[i] = Joueur(i, self.players[i])
-
-        self.pawns = [{} for _ in range(len(self.players))]
-        self.blocked_routes = set()
-        
-        # Set a given seed for repeatability
-        # random.seed(17)
-
-    # Section 2.2.3 - Remaniement fonctions
-    def check_top(self, player_pawns):
-        """ Check if three pawns/bonzes have reached simultaneously the top of the corresponding routes.
-
-        Keyword arguments:
-            bonzes -- Dictionary representing the pawns/bonzes
-        """
-        pawns_on_top = 0
-        if len(player_pawns) < 3:
-            return False
-        else:
-            for route in player_pawns:
-                if player_pawns[route] == self.HEIGHT[route]:
-                    pawns_on_top += 1
+    def select_players(self):
+        """This method extract the players selection from the Setup Frame"""
+        self.n_players, self._active_players = Gui.extract_radio(self._ui)
+        print("# of players: ", self.n_players, "vector for AI: ", self._active_players)
     
-            if pawns_on_top >= 3:
-                return True
-            else:
-                return False
-
-    def game_round(self, current_player):
-        """ Implementation of a game round.
-
-        Keyword arguments:
-        current_player -- Integer id of the current player
-        """
-
-        self.reset_bonzes()
-        self.display_board(self.pawns, self.bonzes)
-        stop_round = False
-        game_won = False
-        AI = self.players[current_player].isAI()
+    def create_players(self):
+        """This method create the players instances"""
+        count = 0
+        for i in range(4):
+            if self._active_players[i] == 'Active':
+                count += 1
+                self.players[count] = Joueur(count, False, self._colors[i + 1], self._ui)
+            elif self._active_players[i] == 'CPU':
+                count += 1
+                self.players[count] = Joueur(count, True, self._colors[i + 1], self._ui)
         
-        while not stop_round:
-            if self.move_bonzes(self.choose_dice(self.throw_dice(), current_player),
-                                current_player):
-                if self.check_top(self.pawns[current_player]):
-                    stop_round = True
-                    game_won = True
-                    print("Vous avez gagné !")
-                    self.display_board(self.pawns, self.bonzes)
-        
-                if not game_won:
-                    stop_round = self.decide_stop(AI)
-        
-                if stop_round:
-                    self.save_pawns(current_player)
+        for i in self.players:
+            print("Giocatore {}: id={} Color={} AI={}".format(i, self.players[i]._id, self.players[i]._color,
+                                                              self.players[i].isAI))
+        return count
     
-            else:
-                print("Vous êtes bloqué !")
-                stop_round = True
-
-        return game_won
-
-    def move_bonzes(self, chosen_routes, player_id):
-        """ Implementation of the business logic to move bonzes.
-
-        Keyword arguments:
-        chosen_routes -- 2-tuple containing the chosen routes
-        current_player -- Integer id of the current player
-        """
-
-        AI = self.players[player_id].isAI()
-        successful_dice_throw = False
-        routes_with_bonzes = []
-        routes_to_place_bonzes = []
-        # Count the number of available bonzes
-        available_bonzes = self.N_BONZES - len(self.bonzes)
-
-        # Check selected routes
-        for route in chosen_routes:
-            # Whether a bonze is present...
-            if route in self.bonzes:
-                routes_with_bonzes.append(route)
-            # ... or not
-            else:
-                if not (route in self.blocked_routes):
-                    routes_to_place_bonzes.append(route)
-
-        # Move bonzes that are already present
-        for route in routes_with_bonzes:
-            if self.bonzes[route] < self.HEIGHT[route]:
-                jump = 1
-                # If there are other players pawns, jump above them
-                while self.exists_pawn(route, self.bonzes[route] + jump, player_id):
-                    jump += 1
-            
-                    # If the top is reached stop at the top
-                if (self.bonzes[route] + jump) > self.HEIGHT[route]:
-                    self.bonzes[route] = self.HEIGHT[route]
-                else:
-                    self.bonzes[route] += jump
-        
-                successful_dice_throw = True
-
-        # Place bonzes
-        if len(routes_to_place_bonzes) >= 2:  # If there are 2 routes available
-            if available_bonzes >= 2:  # And 2 or more bonzes to place
-                for route in routes_to_place_bonzes:  # Place both of them
-                    available_bonzes = self.place_bonze(route, available_bonzes, player_id)
-                    successful_dice_throw = True
-            else:
-                # Otherwise, if there is only a single available bonze but multiple available ways
-                # let the player choose where to place it
-                if available_bonzes == 1:
-                    if not AI:
-                        chosen_route = self.choose_route_human(routes_to_place_bonzes)
-                    else:
-                        chosen_route = self.choose_route_AI(routes_to_place_bonzes)
-
-                    self.place_bonze(chosen_route, available_bonzes, player_id)
-                    successful_dice_throw = True
-
-        else:
-            if len(routes_to_place_bonzes) == 1:
-                # If there is a single route available
-                if available_bonzes >= 1:  # And at least one available bonze
-                    self.place_bonze(routes_to_place_bonzes[0], available_bonzes, player_id)
-                    successful_dice_throw = True
-
-        return successful_dice_throw
-
-    def place_bonze(self, route, available_bonzes, player_id):
-        """ Place a bonze in the selected route, skipping pawns if necessary.
-
-        Keywords arguments
-        route -- Integer representing the target route
-        pawns -- Dictionary representing the pawns
-        bonzes -- Dictionary representing the bonzes
-        available_bonzes -- Integer representing the number of available bonzes
-        """
-        # If there is already a pawn of the player in the chosen route, put the bonze
-        # after the pawn
-        offset = -1
-        if route in self.pawns[player_id]:
-            # If the top is reached then stop at the top
-            if (self.pawns[player_id].get(route) + 1) > self.HEIGHT[route]:
-                self.bonzes[route] = self.HEIGHT[route]
-            else:
-                self.bonzes[route] = self.pawns[player_id].get(route)
-                offset = self.bonzes[route]
-        else:
-            offset = 1
-
-        # If there are other players pawns, jump above them
-        while self.exists_pawn(route, offset, player_id):
-            offset += 1
-        self.bonzes[route] = offset
-
-        return available_bonzes - 1
-
-    # Section 2.2.3 - Autres fonctions
+    def checkBox1Handler(self):
+        """This method handle the events of the checkbox 1"""
+        self.players[self._round]._mutex_box(1)
     
-    def choose_dice_human(self, res_dice, player_id):
-        """ Choice of the pair of dice that should be chosen to advance the bonzes - Human Version
-
-        Keywords arguments:
-        res_dice -- 4-tuple containing the result of the 4-dice throw
-        player_id -- Integer id of the current player
-        """
-        dice_index_selected = None
-
-        while dice_index_selected is None:
-            # self.print_color(self.PAWNS_COLORS[player_id], "[Joueur {0}]".format(player_id + 1), " ")
-            selection_string = input(
-                "Choisir les indices des premières deux dés -> {1} : ".format(player_id + 1, res_dice))
-            dice_index_selected = self.select_dice_verification(selection_string)
-
-        dice_index_not_selected = [i for i in range(self.N_DICE) if i not in dice_index_selected]
-
-        return tuple((sum([res_dice[x] for x in dice_index_selected]),
-                      sum([res_dice[x] for x in dice_index_not_selected])))
-
-    @staticmethod
-    def choose_route_human(available_routes):
-        """ Implementation of the random choice among different available routes. - Human version
-
-        Keywords arguments:
-        available_routes -- 2-tuple containing the routes among which the route should be chosen
-        """
-        valid_input = False
-        chosen_route = -1
-
-        while not valid_input:
-            selection_string = input(
-                "Voies disponibles: {0} - Saisir l'indice (0-1) de la voie à utiliser : ".format(available_routes))
-            if len(selection_string) == 1 and selection_string.isdigit():
-                try:
-                    chosen_route = int(selection_string)
-                except ValueError:
-                    print("Erreur de conversion en entier - choix des voies. Réessayer, svp.")
-                    time.sleep(1)
-        
-                if 0 <= chosen_route <= 1:
-                    valid_input = True
-                else:
-                    print("Veuillez saisir un numero compris entre 0 et 2. Réessayer, svp.")
-                    time.sleep(1)
-            else:
-                print("Mauvais encodage du numero des joueurs. Réessayer, svp.")
-                time.sleep(1)
-
-        return available_routes[chosen_route]
-
-    @staticmethod
-    def decide_stop_human():
-        """ Implementation of the decision whether to stop or not at the end of a game round - Human version
-        """
-        valid_input = False
-        stop = False
-
-        while not valid_input:
-            selection_string = input("Voulez-vous (C)ontinuer ou (A)rrêter? ")
-            # The player decides to continue
-            if selection_string == "C":
-                print("On continue!")
-                stop = False
-                valid_input = True
-            # The player decides to stop
-            elif selection_string == "A":
-                print("Vous vous arrêtez !")
-                stop = True
-                valid_input = True
-            else:
-                print("Option non permise. Réessayer, svp.")
-
-        return stop
-
-    def is_blocked(self, res_dice):
-        """ Check whether a player is blocked or not.
-
-        Keywords arguments:
-        res_dice -- 4-tuple containing the result of the 4-dice throw
-        """
-
-        available_routes = {i for i in range(2, 13)}.difference(self.blocked_routes)
-        possible_routes = self.get_combinaisons(res_dice)
-        bonze_routes = {key for key in self.bonzes}
-        return len(possible_routes.intersection(bonze_routes).intersection(available_routes)) == 0
+    def checkBox2Handler(self):
+        """This method handle the events of the checkbox 2"""
+        self.players[self._round]._mutex_box(2)
     
-    @staticmethod
-    def get_combinaisons(res_dice):
-        """ Return all the possible sums of the res_dice """
-        return {sum(i) for i in itertools.combinations(res_dice, 2)}
-
-    # Section 2.2.4 - AI
-
-    def choose_dice_AI(self, res_dice, player_id):
-        """ Choice of the pair of dice that should be chosen to advance the bonzes - AI Version
-
-        Keywords arguments:
-        res_dice -- 4-tuple containing the result of the 4-dice throw
-        player_id -- Integer id of the current player
+    def checkBox3Handler(self):
+        """This method handle the events of the checkbox 3"""
+        self.players[self._round]._mutex_box(3)
+    
+    def checkBox4Handler(self):
+        """This method handle the events of the checkbox 4"""
+        self.players[self._round]._mutex_box(4)
+    
+    def checkBox5Handler(self):
+        """This method handle the events of the checkbox 5"""
+        self.players[self._round]._mutex_box(5)
+    
+    def checkBox6Handler(self):
+        """This method handle the events of the checkbox 6"""
+        self.players[self._round]._mutex_box(6)
+    
+    def RollButtonHandler(self):
+        """This method handle the events of Roll button"""
+        self.players[self._round].throw_dices()
+    
+    def StopButtonHandler(self):
+        """This method handle the events of Stop button"""
+        self.players[self._round].stop_round()
+    
+    def GoButtonHandler(self):
+        """This method handle the events of GO button"""
+        self.players[self._round].choose_route()
+    
+    def check_top(self, player):
+        """This method checks the end of the game""
+        Parameters
+        ----------
+        player : int
         """
-        # self.print_color(self.PAWNS_COLORS[player_id], "[Joueur {0}]".format(player_id + 1), " ")
-        "En train de choisir les indices des premières deux dés -> {1} : ".format(player_id + 1, res_dice)
-        time.sleep(1)
-        shuffled_dices = list(res_dice)
-        random.shuffle(shuffled_dices)
-        return tuple((sum(shuffled_dices[:(self.N_DICE // 2)]), sum(shuffled_dices[(self.N_DICE // 2):])))
-
-    @staticmethod
-    def choose_route_AI(available_routes):
-        """ Implementation of the random choice among different available routes. - AI version
-
-        Keywords arguments:
-        available_routes -- 2-tuple containing the chosen routes
+        self.end_game, self.winning_player = self.players[player].there_is_a_winner()
+    
+    def board_setup(self, player):
+        """This method refresh setup the board with default values
+        Parameters
+        ----------
+        n : int
         """
-        return random.choice(available_routes)
-
-    def decide_stop_AI(self):
-        """ Implementation of the random decision between stopping the game round or continuing it. - AI version.
-        """
-        return False if random.random() < self.P else True
-
-    # Fonctions Partie 1
-
-    def reset_bonzes(self):
-        """ Empties the bonzes dictionary.
-
-        Keywords arguments:
-        bonzes -- Dictionary representing the bonzes
-        """
-        self.bonzes.clear()
-
-    def throw_dice(self):
-        """ Simulate a 4-dice throw. """
-        return tuple(random.randint(self.MIN_DICE, self.MAX_DICE) for _ in range(self.N_DICE))
-
-    # Auxiliary functions
-
-    def clean_route(self, route, player_id):
-        """ Clean a route (remove all the pawns) once one pawn has reached the top and blocked it.
-
-        Keywords arguments:
-        route -- Integer representing the route to block
-        player_id -- Integer id of the current player
-        """
-        # Remove all the pawns that are in a blocked route
-        for i in range(len(self.pawns)):
-            if i != player_id and self.pawns[i].get(route):
-                del self.pawns[i][route]
-
-    def exists_pawn(self, route, height, player_id):
-        """ Verify whether a pawn exists in a given position of the game board.
-
-        Keywords arguments:
-        route -- Integer representing the route to verify
-        height -- Integer represnting the height to verify
-        pawns -- Dictionary representing the pawns
-        """
-        # Check if there is a pawn in the route "route" at height "height"
-        for i in range(len(self.pawns)):
-            if self.pawns[i].get(route) == height and i != player_id:
-                return True
-        return False
-
-    def save_pawns(self, current_player):
-        """ Function to replace the bonzes with the current player's pawns once his turn has ended.
-
-        Keywords arguments:
-        current_player -- Integer id of the current player
-        """
-        # Merge pawns and bonzes
-        if not self.pawns[current_player]:
-            self.pawns[current_player] = self.bonzes.copy()
-        else:
-            self.pawns[current_player].update(self.bonzes)
-
-        # pawns[current_player] = {**pawns[current_player], **bonzes}
-
-        for route in self.pawns[current_player]:
-            # If one of the pawn reaches the top, then block the route and clean the route
-            if self.pawns[current_player][route] == self.HEIGHT[route]:
-                self.blocked_routes.add(route)
-                self.clean_route(route, current_player)
-
-                self.reset_bonzes()
-
-    def choose_dice(self, res_dice, current_player):
-        """ Wrapper function for the homonym functions for AI and human players.
-
-        Keyword arguments:
-        res_dice -- 4-tuple containing the result of the thrown dice
-        current_player -- Integer id of the current player
-        """
-        AI = self.players[current_player].isAI()
-        return self.choose_dice_AI(res_dice, current_player) if AI else self.choose_dice_human(res_dice, current_player)
-
-    def decide_stop(self, AI):
-        """ Wrapper function for the homonym functions for AI and human players.c
-        Keyword arguments:
-        AI -- Boolean indicating whether the player is controlled by the AI or not
-        """
-        return self.decide_stop_AI() if AI else self.decide_stop_human()
-
-    def display_board(self, pawns, bonzes):
-        """ Print the game board.
-
-        Keyword arguments:
-        pawns -- Dictionary representing the pawns
-            bonzes -- Dictionary representing the bonzes
-        """
-        # Initialize board
-        board = [["?" for _ in range(len(self.HEIGHT.keys()))] for _ in range(self.MAX_HEIGHT + 1)]
-
-        # os.system('cls' if os.name == 'nt' else 'clear')
-        # print_logo()
-        print()
-
-        # Set the empty cells as empty
-        for v in self.HEIGHT:
-            for h in range(self.HEIGHT[v] + 1):
-                board[h][v - self.OFFSET] = []
-
-        # Put the bonzes in the proper positions
-        for b in bonzes:
-            board[bonzes[b]][b - self.OFFSET] = "O"
-
-        # Put the pawns in the proper positions
-        for pawns_player in pawns:
-            for p in pawns_player:
-                board[pawns_player[p]][p - self.OFFSET] = "I"
-
-        # Print the board in reversed order as required
-        for i in reversed(range(1, self.MAX_HEIGHT + 1)):
-            print(str(i), end="\t")
-            for j in range(len(self.HEIGHT.keys())):
-                for symbol in board[i][j]:
-                    if symbol == "X":
-                        for k in range(len(pawns)):
-                            if pawns[k].get(j + self.OFFSET) == i:
-                                pass
-                                # Avoid raising KeyError exception returning a default -1
-                                # self.print_color(self.PAWNS_COLORS[k], str(symbol), "")
-                    else:
-                        print(str(symbol), end="")
-                print("\t", end="")
-            print("")
-        print("\t", end="")
-        for v in self.HEIGHT:
-            if v < 10:
-                print(str(v), end="\t")
-            else:
-                print(str(v), end="\t")
-        print("\n")
-
-        return None
-
-    def select_dice_verification(self, selection_string):
-        """ Verification of the input string, checking that the string has the correct length, does not contains
-        duplicates, nor non-numeric characters. Return a list of tuple (row_index,col_index= with one element for every
-        card encoded by the user.
-        """
-        dice_index_selected = []
-
-        # Verify that the input string has exactly 3 characters: 2 numbers + 1 spaces
-        if len(selection_string) != 3:
-            print("Mauvais encodage des des. Réessayer, svp.")
-            return None
-
-        selection_list = selection_string.split(" ")
-
-        # Verify that splitting the string according to the spaces yields to two elements
-        if len(selection_list) != 2:
-            print("Mauvais encodage des des. Réessayer, svp.")
-            return None
-
-        # Verify the absence of duplicates in the list.
-        if len(selection_list) != len(set(selection_list)):
-            print("Presence des des dupliqueés. Réessayer, svp.")
-            return None
-
-        # Verify that every token after the split of the list is correctly encoded
-        for die_str in selection_list:
-            index = self.select_die_verification(die_str)
-            if index is None:
-                return None
-            dice_index_selected.append(index)
-
-        return dice_index_selected
-
-    def select_die_verification(self, die_str):
-        """ Verification of the input string, checking that the string has the correct length, does not contains
-        duplicates, nor non-numeric characters. Return a list of tuple (row_index,col_index= with one element for
-        every card encoded by the user.
-        """
-        # Verify that a token is exactly two characters long, and then try to parse every element as an integer
-        if len(die_str) == 1:
-            try:
-                # Python indexes : 0 ... n-1
-                index = int(die_str[0]) - 1
-            except ValueError:
-                print("Erreur de conversion en entier, index ligne. Réessayer, svp.")
-                return None
-
-        else:
-            print("Mauvais encodage du dé. Réessayer, svp.")
-            return None
-
-        if index < 0 or index > self.N_DICE:
-            print("Indice du dé incorrect. Réessayer,svp")
-            return None
-
-        return index
-
-    def print_winning_message(self, winning_player):
-        """ Print the winning message for the player that won the game.
-
-        Keyword arguments:
-        winning_player - Integer id of the winning player
-        """
-        print("Bravo ", end="")
-        # self.print_color(self.PAWNS_COLORS[winning_player], "Joueur {0}".format(winning_player + 1), "")
-        print("!", end="")
-        
-    def get_n_players(self):
-        """ Return the number of players """
-        return len(self.players)
+        self._ui.RollButton.setDisabled(False)
+        self._ui.StopButton.setDisabled(True)
+        self._ui.GoButton.setDisabled(True)
+        self._ui.set_Command_Title(self.players[player]._color)
+        self._ui.set_Free_Bonzos("3")  # UPDATE THE LEFT BONZOS
+        self._ui.checkBox[1].stateChanged.connect(self.checkBox1Handler)
+        self._ui.checkBox[2].stateChanged.connect(self.checkBox2Handler)
+        self._ui.checkBox[3].stateChanged.connect(self.checkBox3Handler)
+        self._ui.checkBox[4].stateChanged.connect(self.checkBox4Handler)
+        self._ui.checkBox[5].stateChanged.connect(self.checkBox5Handler)
+        self._ui.checkBox[6].stateChanged.connect(self.checkBox6Handler)
+        for i in range(1, 7):
+            self._ui.checkBox[i].setEnabled(True)
+            self._ui.checkBox[i].setChecked(False)
+    
+    def play_round(self):
+        """This method manage the rounds"""
+        self._game_won = False
+        self._round = (self._round % self.n_players) + 1  # SELECTE ROUND PLAYER
+        # print("Round: ", self._round)
+        self.board_setup(self._round)  # SETUP BOARD
+        playerOn = self.players[self._round]
+        playerOn._end_round = False
+        if playerOn.isAI:  # IF PLAYER AI
+            playerOn.AI(self)
+        else:  # IF PLAYER NOT AI
+            self.wait_end_round(self._round)
+        self.check_top(self._round)
+        return self.winning_player
+    
+    def reset_bonzes(bonzes):
+        """ Empties the bonzes dictionary."""
+        bonzes.clear()
