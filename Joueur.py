@@ -2,11 +2,11 @@
 """
 THIS FILE CONTAINS THE CLASS JEU
 """
-import time
-
-from PyQt4 import QtGui
-
+import random, time, copy
+from Gui import *
 from Jeu import *
+from PyQt4 import QtCore, QtGui
+import time
 
 __author__ = "Luciano Porretta"
 __copyright__ = "Copyright 2017, Luciano Porretta"
@@ -467,8 +467,6 @@ class Joueur(object):
                     self._ui.checkBox[choice[i]].toggle()
             self.showAI()
             time.sleep(PAUSE)
-            self._ui.placePion(5, 5, 1)
-            scores = self.score_voie(None)
             self.choose_route()
             self.showAI()
             self.show_AI_message("Thinking ...")
@@ -480,6 +478,3 @@ class Joueur(object):
                 self.stop_round()
                 self.showAI()
                 self.show_AI_message("Next Player")
-    
-    def score_voie(self, voie):
-        pass

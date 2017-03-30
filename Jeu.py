@@ -3,9 +3,10 @@
 THIS FILE CONTAINS THE CLASS JEU
 """
 
-import time
-
+from Gui import *
 from Joueur import *
+import _thread
+import time
 
 __author__ = "Luciano Porretta"
 __copyright__ = "Copyright 2017, Luciano Porretta"
@@ -138,7 +139,7 @@ class Jeu(object):
         playerOn = self.players[self._round]
         playerOn._end_round = False
         if playerOn.isAI:  # IF PLAYER AI
-            playerOn.AI(self)
+            playerOn.AI()
         else:  # IF PLAYER NOT AI
             self.wait_end_round(self._round)
         self.check_top(self._round)

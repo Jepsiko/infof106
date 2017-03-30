@@ -4,7 +4,8 @@
 THIS FILE CONTAINS THE MAIN LOOP OF THE GAME
 """
 import sys
-
+from PyQt4 import QtCore, QtGui
+from Gui import *
 from Jeu import *
 from Joueur import *
 

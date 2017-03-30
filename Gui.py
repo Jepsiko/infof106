@@ -6,6 +6,7 @@
 #
 
 
+import icons_rc
 from PyQt4 import QtCore, QtGui
 
 __author__ = "Luciano Porretta"
@@ -95,7 +96,6 @@ class Gui(object):
         self.dice = {}
         self.checkBox = {}
         self.error = QtGui.QWidget()
-        self.board = {}
     
     # SETUP METHODS
     def _frame(self, n):
@@ -449,6 +449,7 @@ class Gui(object):
          ----------
          column : int
          row : int
+         player : int
          """
         item = QtGui.QTableWidgetItem()
         item.setIcon(self.bonzo_icon)
