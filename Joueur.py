@@ -1,6 +1,12 @@
 # -*- coding: utf-8 -*-
 """
-THIS FILE CONTAINS THE CLASS JEU
+THIS FILE CONTAINS THE CLASS JOUEUR
+
+Nom : Pierrot
+Prénom : Arthur
+Matricule : 000422751
+Année d'étude : BA2-INFO
+INFO-F106 - Partie 4
 """
 import random, time, copy
 from Gui import *

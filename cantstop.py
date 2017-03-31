@@ -2,6 +2,12 @@
 # !/usr/bin/env python
 """
 THIS FILE CONTAINS THE MAIN LOOP OF THE GAME
+
+Nom : Pierrot
+Prénom : Arthur
+Matricule : 000422751
+Année d'étude : BA2-INFO
+INFO-F106 - Partie 4
 """
 import sys
 from PyQt4 import QtCore, QtGui

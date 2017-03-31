@@ -4,7 +4,15 @@
 #
 # Created by: PyQt4 UI code generator 4.12 and reviseted by the author
 #
+"""
+THIS FILE CONTAINS THE CLASS GUI
 
+Nom : Pierrot
+Prénom : Arthur
+Matricule : 000422751
+Année d'étude : BA2-INFO
+INFO-F106 - Partie 4
+"""
 
 import icons_rc
 from PyQt4 import QtCore, QtGui
