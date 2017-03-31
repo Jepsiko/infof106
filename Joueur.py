@@ -23,9 +23,9 @@ N_DICE = 4
 HEIGHT = {2: 3, 3: 5, 4: 7, 5: 9, 6: 11, 7: 13, 8: 11, 9: 9, 10: 7, 11: 5, 12: 3}
 BLOCKED = []
 BOARD = {}
-P = 0.5
 PAUSE = 0.5
 AI_MSG = 0.5  # SPEED (FAST: 0.5, NORMAL: 2.5)
+AI_MAX_STEPS = 10
 
 
 class Joueur(object):
@@ -365,6 +365,16 @@ class Joueur(object):
     def reset_bonzes(self):
         """ Empties the bonzes dictionary and remove their representation on th main window"""
         self._bonzes.clear()
+        
+    def get_id(self):
+        """
+        Return the id
+        
+        Return
+        ---------
+        int
+        """
+        return self._id
     
     # AI SECTION
     def show_AI_message(self, msg):
@@ -383,19 +393,19 @@ class Joueur(object):
         self._ui.lockSelectFrame()
         QtGui.qApp.processEvents()
     
-    def AI_choose_route(self):
+    def AI_choose_route(self, game):
         """This method search for a route for the AI
-        Retunrs
+        Returns
         ----------
         list
         """
         dice = None
-        if self._bonzes:
-            for i in range(6):
-                if self._dices_pairs[i] in self._bonzes:
-                    dice = i + 1
-        if not dice:
-            dice = random.randint(MIN_DICE, MAX_DICE)
+        other_players = game.get_other_players(self._id)
+        scores = [self.AI_score_voie(voie, other_players) for voie in range(2, 13)]
+        try:
+            dice = self.AI_compute_best_shot(scores)
+        except:
+            pass
         if dice == 1 or dice == 4:
             boxes = [1, 4]
         if dice == 2 or dice == 5:
@@ -404,13 +414,13 @@ class Joueur(object):
             boxes = [3, 6]
         return boxes
     
-    def AI_choice(self):
+    def AI_choice(self, game):
         """This method simulate the choice of the route for the AI
-        Retunrs
+        Returns
         ----------
         list
         """
-        boxes = self.AI_choose_route()
+        boxes = self.AI_choose_route(game)
         labels = [int(self._ui.checkBox[boxes[0]].text()), int(self._ui.checkBox[boxes[1]].text())]
         labelist = set(labels)
         checklist = labelist.intersection(self._bonzes.keys())
@@ -447,9 +457,16 @@ class Joueur(object):
             res = (boxes[0], boxes[1])
         return res
     
-    def AI(self):
-        """This method simulate the AI behavior"""
+    def AI(self, game):
+        """
+        This method simulate the AI behavior
+        
+        Parameters
+        ----------
+        game : Jeu
+        """
         stop = False
+        step = 0
         while not stop:
             self.show_AI_message("I'm player {}".format(self._color))
             self.showAI()
@@ -459,7 +476,7 @@ class Joueur(object):
             self.showAI()
             self.show_AI_message("Thinking ...")
             # time.sleep(PAUSE)
-            choice = self.AI_choice()
+            choice = self.AI_choice(game)
             # choice = random.randint(MIN_DICE, MAX_DICE)
             # self.show_AI_message("I choose {}".format(choice))
             for i in range(2):
@@ -471,10 +488,56 @@ class Joueur(object):
             self.showAI()
             self.show_AI_message("Thinking ...")
             time.sleep(PAUSE)
-            stop = random.random() < P
+            stop = self.AI_score_stop(step)
+            step += 1
             if stop:
                 self.show_AI_message("I want to stop!")
                 stop = True
                 self.stop_round()
                 self.showAI()
                 self.show_AI_message("Next Player")
+
+    def AI_score_voie(self, voie, other_players):
+        """
+        Return the score of the voie
+        
+        Parameters
+        ----------
+        voie : int
+        other_players : list of Joueur
+        
+        Return
+        ----------
+        int
+        """
+        score = 0
+        for player in other_players:
+            pawns = player._pawns
+            try:
+                if pawns[voie] == self._bonzes[voie]-1:
+                    score = 3
+                elif pawns[voie] == self._pawns[voie]-1:
+                    score = 1
+            except:
+                pass
+        return score
+
+    def AI_compute_best_shot(self, scores):
+        """
+        Returns
+        ---------
+        int
+        """
+        
+        sums = [scores[self._dices_pairs[0]-2] + scores[self._dices_pairs[3]-2],
+                scores[self._dices_pairs[1]-2] + scores[self._dices_pairs[4]-2],
+                scores[self._dices_pairs[2]-2] + scores[self._dices_pairs[5]-2]]
+        return sums.index(max(sums))+1
+
+    def AI_score_stop(self, step_count):
+        """
+        Return
+        ---------
+        bool
+        """
+        return random.randint(0, AI_MAX_STEPS) <= step_count

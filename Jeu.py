@@ -65,6 +65,25 @@ class Jeu(object):
                                                               self.players[i].isAI))
         return count
     
+    def get_other_players(self, _id):
+        """
+        Return a list of the other players's id
+        
+        Parameters
+        ----------
+        _id : int
+        
+        Return
+        ----------
+        list
+        """
+        
+        other_players = []
+        for i in range(1, len(self.players)+1):
+            if self.players[i].get_id() != _id:
+                other_players.append(self.players[i])
+        return other_players
+    
     def checkBox1Handler(self):
         """This method handle the events of the checkbox 1"""
         self.players[self._round]._mutex_box(1)
@@ -139,7 +158,7 @@ class Jeu(object):
         playerOn = self.players[self._round]
         playerOn._end_round = False
         if playerOn.isAI:  # IF PLAYER AI
-            playerOn.AI()
+            playerOn.AI(self)
         else:  # IF PLAYER NOT AI
             self.wait_end_round(self._round)
         self.check_top(self._round)
