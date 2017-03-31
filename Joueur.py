@@ -33,7 +33,7 @@ PAUSE = 0.5
 AI_MSG = 0.5  # SPEED (FAST: 0.5, NORMAL: 2.5)
 AI_MAX_STEPS = 10
 ALPHA = 1  # Ponderation of the score with jump
-BETA = 1  # Ponderation of the score with distance
+BETA = 10  # Ponderation of the score with distance
 
 
 class Joueur(object):
@@ -548,9 +548,9 @@ class Joueur(object):
         """
         
         if voie in self._bonzes:
-            return HEIGHT[voie]-self._bonzes[voie]
+            return 1/(HEIGHT[voie]-self._bonzes[voie])
         elif voie in self._pawns:
-            return HEIGHT[voie]-self._pawns[voie]
+            return 1/(HEIGHT[voie]-self._pawns[voie])
         else:
             return 0
 
