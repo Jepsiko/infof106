@@ -26,6 +26,8 @@ BOARD = {}
 PAUSE = 0.5
 AI_MSG = 0.5  # SPEED (FAST: 0.5, NORMAL: 2.5)
 AI_MAX_STEPS = 10
+ALPHA = 1  # Ponderation of the score with jump
+BETA = 1  # Ponderation of the score with distance
 
 
 class Joueur(object):
@@ -402,7 +404,10 @@ class Joueur(object):
         """
         dice = None
         other_players = game.get_other_players(self._id)
-        scores = [self.AI_score_voie(voie, other_players) for voie in range(2, 13)]
+        scores = [self.AI_score_voie_with_jump(voie, other_players) for voie in range(2, 13)]
+        if self.difficulty == 1:
+            other_scores = [self.AI_score_voie_with_distance(voie) for voie in range(2, 13)]
+            scores = [ALPHA*scores[i]+BETA*other_scores[i] for i in range(len(scores))]
         try:
             dice = self.AI_compute_best_shot(scores)
         except:
@@ -489,7 +494,7 @@ class Joueur(object):
             self.showAI()
             self.show_AI_message("Thinking ...")
             time.sleep(PAUSE)
-            stop = self.AI_score_stop(step)
+            stop = self.AI_choose_stop(step)
             step += 1
             if stop:
                 self.show_AI_message("I want to stop!")
@@ -498,7 +503,7 @@ class Joueur(object):
                 self.showAI()
                 self.show_AI_message("Next Player")
 
-    def AI_score_voie(self, voie, other_players):
+    def AI_score_voie_with_jump(self, voie, other_players):
         """
         Return the score of the voie
         
@@ -522,6 +527,26 @@ class Joueur(object):
             except:
                 pass
         return score
+    
+    def AI_score_voie_with_distance(self, voie):
+        """
+        Return the score of the voie
+        
+        Parameters
+        ----------
+        voie : int
+        
+        Return
+        ----------
+        int
+        """
+        
+        if voie in self._bonzes:
+            return HEIGHT[voie]-self._bonzes[voie]
+        elif voie in self._pawns:
+            return HEIGHT[voie]-self._pawns[voie]
+        else:
+            return 0
 
     def AI_compute_best_shot(self, scores):
         """
@@ -535,10 +560,13 @@ class Joueur(object):
                 scores[self._dices_pairs[2]-2] + scores[self._dices_pairs[5]-2]]
         return sums.index(max(sums))+1
 
-    def AI_score_stop(self, step_count):
+    def AI_choose_stop(self, step_count):
         """
         Return
         ---------
         bool
         """
+        for i in range(len(self._bonzes)):
+            if self._bonzes[i] == HEIGHT[i]:
+                return True  # If the AI has one bonze on top, it save it by stoping it's turn
         return random.randint(0, AI_MAX_STEPS) <= step_count
