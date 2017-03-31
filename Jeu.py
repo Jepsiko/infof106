@@ -58,11 +58,11 @@ class Jeu(object):
                 self.players[count] = Joueur(count, False, self._colors[i + 1], self._ui)
             elif self._active_players[i] == 'CPU':
                 count += 1
-                self.players[count] = Joueur(count, True, self._colors[i + 1], self._ui)
+                self.players[count] = Joueur(count, True, self._colors[i + 1], self._ui, self._ui.get_difficulty(count))
         
         for i in self.players:
-            print("Giocatore {}: id={} Color={} AI={}".format(i, self.players[i]._id, self.players[i]._color,
-                                                              self.players[i].isAI))
+            print("Giocatore {}: id={} Color={} AI={} Difficulty={}".format(i, self.players[i]._id,
+                            self.players[i]._color, self.players[i].isAI, self.players[i].difficulty))
         return count
     
     def get_other_players(self, _id):

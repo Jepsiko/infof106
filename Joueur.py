@@ -29,13 +29,14 @@ AI_MAX_STEPS = 10
 
 
 class Joueur(object):
-    def __init__(self, id, ai, color, ui):
+    def __init__(self, id, ai, color, ui, difficulty=0):
         self._id = id
         self._color = color
         self._pawns = {}
         self._bonzes = {}
         self._max_bonzes = 3
         self.isAI = ai
+        self.difficulty = difficulty
         self._ui = ui
         self._end_round = False
         self._dices_pairs = None

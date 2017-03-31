@@ -87,6 +87,7 @@ class Gui(object):
         self.radio_user = {}
         self.radio_cpu = {}
         self.radio_none = {}
+        self.combo_difficulty = {}
         # USEFUL DICTIONARY MAIN
         self._route_len = {2: 3, 3: 5, 4: 7, 5: 9, 6: 11, 7: 13, 8: 11, 9: 9, 10: 7, 11: 5, 12: 3}
         self.colors = {'Red': Gui.red, 'Green': Gui.green, 'Blue': Gui.blue, 'Yellow': Gui.yellow}
@@ -127,7 +128,7 @@ class Gui(object):
         n : int
         """
         frame_title = QtGui.QLabel(frame)
-        frame_title.setGeometry(QtCore.QRect(0, 0, 291, 21))
+        frame_title.setGeometry(QtCore.QRect(0, 0, 350, 21))
         if n == 1:
             frame_title.setObjectName(_fromUtf8("P1_frame_title"))
         if n == 2:
@@ -635,6 +636,14 @@ class Gui(object):
          msg : str
          """
         self.bonzo_label.setText(_translate("Main", "{} {}".format("Free:", msg), None))
+        
+    def get_difficulty(self, count):
+        """
+        Returns
+        ----------
+        int
+        """
+        return self.combo_difficulty[count].currentIndex()
     
     # SETUP MAIN WINDOW
     def MainUi(self, Main):
@@ -901,7 +910,7 @@ class Gui(object):
     # SETUP SELECT WINDOW
     def SelectUi(self, SetupGame):
         SetupGame.setObjectName(_fromUtf8("SetupGame"))
-        SetupGame.resize(342, 479)
+        SetupGame.resize(428, 479)
         self.MainGridLayout = QtGui.QGridLayout(SetupGame)
         self.MainGridLayout.setObjectName(_fromUtf8("MainGridLayout"))
         self.MainFrame = QtGui.QFrame(SetupGame)
@@ -915,13 +924,17 @@ class Gui(object):
         self.frame[1] = self._frame(1)
         self.frame_title[1] = self._frame_title(self.frame[1], 1)
         self.layoutWidgetFrame1 = QtGui.QWidget(self.frame[1])
-        self.layoutWidgetFrame1.setGeometry(QtCore.QRect(10, 30, 244, 20))
+        self.layoutWidgetFrame1.setGeometry(QtCore.QRect(10, 30, 340, 20))
         self.layoutWidgetFrame1.setObjectName(_fromUtf8("layoutWidget_3"))
         self.P1_horizontalLayout = QtGui.QHBoxLayout(self.layoutWidgetFrame1)
         self.P1_horizontalLayout.setMargin(0)
         self.P1_horizontalLayout.setObjectName(_fromUtf8("P1_horizontalLayout"))
         self.radio_user[1] = self._radio_user(self.layoutWidgetFrame1, self.P1_horizontalLayout, 1)
         self.radio_cpu[1] = self._radio_cpu(self.layoutWidgetFrame1, self.P1_horizontalLayout, 1)
+        self.combo_difficulty[1] = QtGui.QComboBox(self.layoutWidgetFrame1)
+        self.combo_difficulty[1].addItem("Easy")
+        self.combo_difficulty[1].addItem("Hard")
+        self.P1_horizontalLayout.addWidget(self.combo_difficulty[1])
         self.radio_none[1] = self._radio_none(self.layoutWidgetFrame1, self.P1_horizontalLayout, 1)
         self.FrameGridLayout.addWidget(self.frame[1], 1, 0, 1, 1)
         
@@ -929,13 +942,17 @@ class Gui(object):
         self.frame[2] = self._frame(2)
         self.frame_title[2] = self._frame_title(self.frame[2], 2)
         self.layoutWidgetFrame2 = QtGui.QWidget(self.frame[2])
-        self.layoutWidgetFrame2.setGeometry(QtCore.QRect(10, 30, 244, 20))
+        self.layoutWidgetFrame2.setGeometry(QtCore.QRect(10, 30, 340, 20))
         self.layoutWidgetFrame2.setObjectName(_fromUtf8("layoutWidget_2"))
         self.P2_horizontalLayout = QtGui.QHBoxLayout(self.layoutWidgetFrame2)
         self.P2_horizontalLayout.setMargin(0)
         self.P2_horizontalLayout.setObjectName(_fromUtf8("P2_horizontalLayout"))
         self.radio_user[2] = self._radio_user(self.layoutWidgetFrame2, self.P2_horizontalLayout, 2)
         self.radio_cpu[2] = self._radio_cpu(self.layoutWidgetFrame2, self.P2_horizontalLayout, 2)
+        self.combo_difficulty[2] = QtGui.QComboBox(self.layoutWidgetFrame2)
+        self.combo_difficulty[2].addItem("Easy")
+        self.combo_difficulty[2].addItem("Hard")
+        self.P2_horizontalLayout.addWidget(self.combo_difficulty[2])
         self.radio_none[2] = self._radio_none(self.layoutWidgetFrame2, self.P2_horizontalLayout, 2)
         self.FrameGridLayout.addWidget(self.frame[2], 2, 0, 1, 1)
         self.MainGridLayout.addWidget(self.MainFrame, 0, 1, 1, 1)
@@ -944,13 +961,17 @@ class Gui(object):
         self.frame[3] = self._frame(3)
         self.frame_title[3] = self._frame_title(self.frame[3], 3)
         self.layoutWidgetFrame3 = QtGui.QWidget(self.frame[3])
-        self.layoutWidgetFrame3.setGeometry(QtCore.QRect(10, 30, 244, 20))
+        self.layoutWidgetFrame3.setGeometry(QtCore.QRect(10, 30, 340, 20))
         self.layoutWidgetFrame3.setObjectName(_fromUtf8("layoutWidget1"))
         self.P3_horizontalLayout = QtGui.QHBoxLayout(self.layoutWidgetFrame3)
         self.P3_horizontalLayout.setMargin(0)
         self.P3_horizontalLayout.setObjectName(_fromUtf8("P3_horizontalLayout"))
         self.radio_user[3] = self._radio_user(self.layoutWidgetFrame3, self.P3_horizontalLayout, 3)
         self.radio_cpu[3] = self._radio_cpu(self.layoutWidgetFrame3, self.P3_horizontalLayout, 3)
+        self.combo_difficulty[3] = QtGui.QComboBox(self.layoutWidgetFrame3)
+        self.combo_difficulty[3].addItem("Easy")
+        self.combo_difficulty[3].addItem("Hard")
+        self.P3_horizontalLayout.addWidget(self.combo_difficulty[3])
         self.radio_none[3] = self._radio_none(self.layoutWidgetFrame3, self.P3_horizontalLayout, 3)
         self.FrameGridLayout.addWidget(self.frame[3], 3, 0, 1, 1)
         
@@ -958,13 +979,17 @@ class Gui(object):
         self.frame[4] = self._frame(4)
         self.frame_title[4] = self._frame_title(self.frame[4], 4)
         self.layoutWidgetFrame4 = QtGui.QWidget(self.frame[4])
-        self.layoutWidgetFrame4.setGeometry(QtCore.QRect(10, 30, 244, 20))
+        self.layoutWidgetFrame4.setGeometry(QtCore.QRect(10, 30, 340, 20))
         self.layoutWidgetFrame4.setObjectName(_fromUtf8("layoutWidget"))
         self.P4_horizontalLayout = QtGui.QHBoxLayout(self.layoutWidgetFrame4)
         self.P4_horizontalLayout.setMargin(0)
         self.P4_horizontalLayout.setObjectName(_fromUtf8("P4_horizontalLayout"))
         self.radio_user[4] = self._radio_user(self.layoutWidgetFrame4, self.P4_horizontalLayout, 4)
         self.radio_cpu[4] = self._radio_cpu(self.layoutWidgetFrame4, self.P4_horizontalLayout, 4)
+        self.combo_difficulty[4] = QtGui.QComboBox(self.layoutWidgetFrame4)
+        self.combo_difficulty[4].addItem("Easy")
+        self.combo_difficulty[4].addItem("Hard")
+        self.P4_horizontalLayout.addWidget(self.combo_difficulty[4])
         self.radio_none[4] = self._radio_none(self.layoutWidgetFrame4, self.P4_horizontalLayout, 4)
         self.FrameGridLayout.addWidget(self.frame[4], 4, 0, 1, 1)
         
@@ -1008,215 +1033,3 @@ class Gui(object):
     
     def set_Error_Dialog(self, msg):
         self.error_msg.setText(_translate("Dialog", "{}".format(msg), None))
-
-
-class Ui_SetupGame(object):
-    def __init__(self):
-        # QPimax
-        self._user_png = QtGui.QPixmap(_fromUtf8(":/icns/blueberry/PNG/32/user_friend.png"))
-        self._cpu_png = QtGui.QPixmap(_fromUtf8(":/icns/blueberry/PNG/32/computer_monitor.png"))
-        self._none_png = QtGui.QPixmap(_fromUtf8(":/icns/blueberry/PNG/32/delete_2.png"))
-        # ICONS
-        self.icon_user = QtGui.QIcon()
-        self.icon_user.addPixmap(self._user_png, QtGui.QIcon.Normal, QtGui.QIcon.Off)
-        self.icon_cpu = QtGui.QIcon()
-        self.icon_cpu.addPixmap(self._cpu_png, QtGui.QIcon.Normal, QtGui.QIcon.Off)
-        self.icon_none = QtGui.QIcon()
-        self.icon_none.addPixmap(self._none_png, QtGui.QIcon.Normal, QtGui.QIcon.Off)
-        # USEFUL DICTIONARY
-        self.frame = {}
-        self.frame_title = {}
-        self.radio_user = {}
-        self.radio_cpu = {}
-        self.radio_none = {}
-    
-    def _frame(self, n):
-        frame = QtGui.QFrame(self.MainFrame)
-        frame.setFrameShape(QtGui.QFrame.StyledPanel)
-        frame.setFrameShadow(QtGui.QFrame.Raised)
-        frame_title = QtGui.QLabel(frame)
-        if n == 1:
-            frame.setObjectName(_fromUtf8("P1_frame"))
-        if n == 2:
-            frame.setObjectName(_fromUtf8("P2_frame"))
-        if n == 3:
-            frame.setObjectName(_fromUtf8("P3_frame"))
-        if n == 4:
-            frame.setObjectName(_fromUtf8("P4_frame"))
-        return frame
-    
-    def _frame_title(self, frame, n):
-        frame_title = QtGui.QLabel(frame)
-        frame_title.setGeometry(QtCore.QRect(0, 0, 291, 21))
-        if n == 1:
-            frame_title.setObjectName(_fromUtf8("P1_frame_title"))
-        if n == 2:
-            frame_title.setObjectName(_fromUtf8("P2_frame_title"))
-        if n == 3:
-            frame_title.setObjectName(_fromUtf8("P3_frame_title"))
-        if n == 4:
-            frame_title.setObjectName(_fromUtf8("P4_frame_title"))
-        font = QtGui.QFont()
-        font.setPointSize(18)
-        frame_title.setFont(font)
-        frame_title.setFrameShape(QtGui.QFrame.WinPanel)
-        frame_title.setFrameShadow(QtGui.QFrame.Raised)
-        return frame_title
-    
-    def _radio_user(self, layout, hlayout, n):
-        radio = QtGui.QRadioButton(layout)
-        radio.setIcon(self.icon_user)
-        if n == 1:
-            radio.setObjectName(_fromUtf8("P1_User_radio"))
-            hlayout.addWidget(radio)
-        if n == 2:
-            radio.setObjectName(_fromUtf8("P2_User_radio"))
-            hlayout.addWidget(radio)
-        if n == 3:
-            radio.setObjectName(_fromUtf8("P3_User_radio"))
-            hlayout.addWidget(radio)
-        if n == 4:
-            radio.setObjectName(_fromUtf8("P4_User_radio"))
-            hlayout.addWidget(radio)
-        return radio
-    
-    def _radio_cpu(self, layout, hlayout, n):
-        radio = QtGui.QRadioButton(layout)
-        radio.setIcon(self.icon_cpu)
-        if n == 1:
-            radio.setObjectName(_fromUtf8("P1_CPU_radio"))
-            hlayout.addWidget(radio)
-        if n == 2:
-            radio.setObjectName(_fromUtf8("P2_CPU_radio"))
-            hlayout.addWidget(radio)
-        if n == 3:
-            radio.setObjectName(_fromUtf8("P3_CPU_radio"))
-            hlayout.addWidget(radio)
-        if n == 4:
-            radio.setObjectName(_fromUtf8("P4_CPU_radio"))
-            hlayout.addWidget(radio)
-        return radio
-    
-    def _radio_none(self, layout, hlayout, n):
-        radio = QtGui.QRadioButton(layout)
-        radio.setIcon(self.icon_none)
-        if n == 1:
-            radio.setObjectName(_fromUtf8("P1_None_radio"))
-            hlayout.addWidget(radio)
-        if n == 2:
-            radio.setObjectName(_fromUtf8("P2_None_radio"))
-            hlayout.addWidget(radio)
-        if n == 3:
-            radio.setObjectName(_fromUtf8("P3_None_radio"))
-            hlayout.addWidget(radio)
-        if n == 4:
-            radio.setObjectName(_fromUtf8("P4_None_radio"))
-            hlayout.addWidget(radio)
-        return radio
-    
-    def setupUi(self, SetupGame):
-        SetupGame.setObjectName(_fromUtf8("SetupGame"))
-        SetupGame.resize(342, 479)
-        self.MainGridLayout = QtGui.QGridLayout(SetupGame)
-        self.MainGridLayout.setObjectName(_fromUtf8("MainGridLayout"))
-        self.MainFrame = QtGui.QFrame(SetupGame)
-        self.MainFrame.setFrameShape(QtGui.QFrame.Box)
-        self.MainFrame.setFrameShadow(QtGui.QFrame.Raised)
-        self.MainFrame.setObjectName(_fromUtf8("MainFrame"))
-        self.FrameGridLayout = QtGui.QGridLayout(self.MainFrame)
-        self.FrameGridLayout.setObjectName(_fromUtf8("FrameGridLayout"))
-        
-        # SETUP FRAME 1
-        self.frame[1] = self._frame(1)
-        self.frame_title[1] = self._frame_title(self.frame[1], 1)
-        self.layoutWidgetFrame1 = QtGui.QWidget(self.frame[1])
-        self.layoutWidgetFrame1.setGeometry(QtCore.QRect(10, 30, 244, 20))
-        self.layoutWidgetFrame1.setObjectName(_fromUtf8("layoutWidget_3"))
-        self.P1_horizontalLayout = QtGui.QHBoxLayout(self.layoutWidgetFrame1)
-        self.P1_horizontalLayout.setMargin(0)
-        self.P1_horizontalLayout.setObjectName(_fromUtf8("P1_horizontalLayout"))
-        self.radio_user[1] = self._radio_user(self.layoutWidgetFrame1, self.P1_horizontalLayout, 1)
-        self.radio_cpu[1] = self._radio_cpu(self.layoutWidgetFrame1, self.P1_horizontalLayout, 1)
-        self.radio_none[1] = self._radio_none(self.layoutWidgetFrame1, self.P1_horizontalLayout, 1)
-        self.FrameGridLayout.addWidget(self.frame[1], 1, 0, 1, 1)
-        
-        # SETUP FRAME 2
-        self.frame[2] = self._frame(2)
-        self.frame_title[2] = self._frame_title(self.frame[2], 2)
-        self.layoutWidgetFrame2 = QtGui.QWidget(self.frame[2])
-        self.layoutWidgetFrame2.setGeometry(QtCore.QRect(10, 30, 244, 20))
-        self.layoutWidgetFrame2.setObjectName(_fromUtf8("layoutWidget_2"))
-        self.P2_horizontalLayout = QtGui.QHBoxLayout(self.layoutWidgetFrame2)
-        self.P2_horizontalLayout.setMargin(0)
-        self.P2_horizontalLayout.setObjectName(_fromUtf8("P2_horizontalLayout"))
-        self.radio_user[2] = self._radio_user(self.layoutWidgetFrame2, self.P2_horizontalLayout, 2)
-        self.radio_cpu[2] = self._radio_cpu(self.layoutWidgetFrame2, self.P2_horizontalLayout, 2)
-        self.radio_none[2] = self._radio_none(self.layoutWidgetFrame2, self.P2_horizontalLayout, 2)
-        self.FrameGridLayout.addWidget(self.frame[2], 2, 0, 1, 1)
-        self.MainGridLayout.addWidget(self.MainFrame, 0, 1, 1, 1)
-        
-        # SETUP FRAME 3
-        self.frame[3] = self._frame(3)
-        self.frame_title[3] = self._frame_title(self.frame[3], 3)
-        self.layoutWidgetFrame3 = QtGui.QWidget(self.frame[3])
-        self.layoutWidgetFrame3.setGeometry(QtCore.QRect(10, 30, 244, 20))
-        self.layoutWidgetFrame3.setObjectName(_fromUtf8("layoutWidget1"))
-        self.P3_horizontalLayout = QtGui.QHBoxLayout(self.layoutWidgetFrame3)
-        self.P3_horizontalLayout.setMargin(0)
-        self.P3_horizontalLayout.setObjectName(_fromUtf8("P3_horizontalLayout"))
-        self.radio_user[3] = self._radio_user(self.layoutWidgetFrame3, self.P3_horizontalLayout, 3)
-        self.radio_cpu[3] = self._radio_cpu(self.layoutWidgetFrame3, self.P3_horizontalLayout, 3)
-        self.radio_none[3] = self._radio_none(self.layoutWidgetFrame3, self.P3_horizontalLayout, 3)
-        self.FrameGridLayout.addWidget(self.frame[3], 3, 0, 1, 1)
-        
-        # SETUP FRAME 4
-        self.frame[4] = self._frame(4)
-        self.frame_title[4] = self._frame_title(self.frame[4], 4)
-        self.layoutWidgetFrame4 = QtGui.QWidget(self.frame[4])
-        self.layoutWidgetFrame4.setGeometry(QtCore.QRect(10, 30, 244, 20))
-        self.layoutWidgetFrame4.setObjectName(_fromUtf8("layoutWidget"))
-        self.P4_horizontalLayout = QtGui.QHBoxLayout(self.layoutWidgetFrame4)
-        self.P4_horizontalLayout.setMargin(0)
-        self.P4_horizontalLayout.setObjectName(_fromUtf8("P4_horizontalLayout"))
-        self.radio_user[4] = self._radio_user(self.layoutWidgetFrame4, self.P4_horizontalLayout, 4)
-        self.radio_cpu[4] = self._radio_cpu(self.layoutWidgetFrame4, self.P4_horizontalLayout, 4)
-        self.radio_none[4] = self._radio_none(self.layoutWidgetFrame4, self.P4_horizontalLayout, 4)
-        self.FrameGridLayout.addWidget(self.frame[4], 4, 0, 1, 1)
-        
-        # SETUP MAIN FRAME TITLE
-        self.SetupTitle = QtGui.QLabel(self.MainFrame)
-        font = QtGui.QFont()
-        font.setPointSize(30)
-        self.SetupTitle.setFont(font)
-        self.SetupTitle.setAlignment(QtCore.Qt.AlignCenter)
-        self.SetupTitle.setObjectName(_fromUtf8("SetupTitle"))
-        # SETUP BUTTON
-        self.ok_button = QtGui.QPushButton(self.MainFrame)
-        self.ok_button.setObjectName(_fromUtf8("ok_button"))
-        self.FrameGridLayout.addWidget(self.ok_button, 5, 0, 1, 1, QtCore.Qt.AlignHCenter)
-        self.FrameGridLayout.addWidget(self.SetupTitle, 0, 0, 1, 1)
-        
-        self.retranslateUi(SetupGame)
-        # QtCore.QObject.connect(self.ok_button, QtCore.SIGNAL(_fromUtf8("clicked()")),self. )
-        QtCore.QMetaObject.connectSlotsByName(SetupGame)
-    
-    def retranslateUi(self, SetupGame):
-        SetupGame.setWindowTitle(_translate("SetupGame", "Setup Game", None))
-        self.frame_title[1].setText(_translate("SetupGame", "Player 1", None))
-        self.radio_user[1].setText(_translate("SetupGame", "User", None))
-        self.radio_cpu[1].setText(_translate("SetupGame", "CPU", None))
-        self.radio_none[1].setText(_translate("SetupGame", "None", None))
-        self.ok_button.setText(_translate("SetupGame", "OK", None))
-        self.frame_title[4].setText(_translate("SetupGame", "Player 4", None))
-        self.radio_user[4].setText(_translate("SetupGame", "User", None))
-        self.radio_cpu[4].setText(_translate("SetupGame", "CPU", None))
-        self.radio_none[4].setText(_translate("SetupGame", "None", None))
-        self.SetupTitle.setText(_translate("SetupGame", "Select Players", None))
-        self.frame_title[3].setText(_translate("SetupGame", "Player 3", None))
-        self.radio_user[3].setText(_translate("SetupGame", "User", None))
-        self.radio_cpu[3].setText(_translate("SetupGame", "CPU", None))
-        self.radio_none[3].setText(_translate("SetupGame", "None", None))
-        self.frame_title[2].setText(_translate("SetupGame", "Player 2", None))
-        self.radio_user[2].setText(_translate("SetupGame", "User", None))
-        self.radio_cpu[2].setText(_translate("SetupGame", "CPU", None))
-        self.radio_none[2].setText(_translate("SetupGame", "None", None))
