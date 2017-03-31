@@ -566,7 +566,8 @@ class Joueur(object):
         ---------
         bool
         """
-        for i in range(len(self._bonzes)):
+        
+        for i in self._bonzes.keys():
             if self._bonzes[i] == HEIGHT[i]:
                 return True  # If the AI has one bonze on top, it save it by stoping it's turn
         return random.randint(0, AI_MAX_STEPS) <= step_count
